@@ -69,11 +69,15 @@ pip install -r requirements.txt
 2. Open Webots and load `worlds/parking_lot.wbt`.
 3. Press **Run** to start the simulation. The car will search for a free slot, plan a route and park itself.
 
-To test the route planner on its own (without Webots):
+To test the route planner on its own (without Webots), from the repository root:
 
 ```bash
-python planner/astar.py
+python planner/astar.py                  # small standalone A* demo with a plot
+python -m unittest discover -s tests     # planner unit tests
+python -m planner.compare_planners       # A* vs A* + smoothing vs Hybrid A* -> results/
 ```
+
+How to call the planner from a controller: see [docs/m2_route_planner.md](docs/m2_route_planner.md).
 
 ## Results
 
