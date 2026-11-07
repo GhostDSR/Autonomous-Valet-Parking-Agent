@@ -13,7 +13,7 @@ A car-like (Ackermann-steering) vehicle that finds a free slot in a parking lot 
 |---|---|---|
 | Devansh Singh Rawat | 500124378 | TBD |
 | Mohammad Shahvez | 500124132 | TBD |
-| Harshil Mittal | 500121907 | TBD |
+| Harshil Mittal | 500121907 | M3 – Parking Manoeuvres |
 | Bhavya Talwar | 500121992 | M2 – Route Planner |
 
 ## Modules
@@ -74,6 +74,24 @@ To test the route planner on its own (without Webots):
 ```bash
 python planner/astar.py
 ```
+## M3 – Parking Manoeuvres
+
+Implemented by **Harshil Mittal**.
+
+- Parking state machine: search → drive → align → park → done.
+- Perpendicular reverse parking with feedback steering and bounded alignment corrections.
+- Emergency stops, sensor validation, speed and steering limits, and parking completion checks.
+
+Run the standalone M3 tests from the repository root:
+
+```bash
+python -m unittest discover -s tests -p "test_parking.py" -v
+```
+
+The 19 tests pass in GitHub Actions. They use synthetic sensor inputs and a kinematic vehicle model. Webots integration and experiments with M1 and M4 remain pending.
+
+See [M3 documentation](docs/m3_parking.md) for interfaces, assumptions and configuration.
+
 
 ## Results
 
