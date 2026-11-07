@@ -1,0 +1,33 @@
+name: M3 Parking Tests
+
+on:
+  push:
+    branches: [m3-parking, main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Parking tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Download repository files
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Check test file location
+        run: test -f tests/test_parking.py
+
+      - name: Run parking tests
+        run: python -m unittest discover -s tests -p "test_parking.py" -v
