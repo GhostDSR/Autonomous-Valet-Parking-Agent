@@ -40,16 +40,7 @@ def main():
         sensor.enable(timestep)
         distance_sensors[name] = sensor
 
-    # M1 defines the Ackermann hardware. M4 will later own the motion loop.
-    for name in ("front_left_steer", "front_right_steer"):
-        motor = robot.getDevice(name)
-        motor.setPosition(0.0)
-        motor.setVelocity(1.0)
-    for name in ("front_left_wheel_motor", "front_right_wheel_motor",
-                 "rear_left_wheel_motor", "rear_right_wheel_motor"):
-        motor = robot.getDevice(name)
-        motor.setPosition(float("inf"))
-        motor.setVelocity(0.0)
+    # M1 is sensor-only; M4 will own actuator devices and motion commands.
 
     last_report = -1.0
     while robot.step(timestep) != -1:
