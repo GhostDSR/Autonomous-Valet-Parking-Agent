@@ -17,8 +17,7 @@ The world follows the geometry already used by M2 in \`planner/parking_lot.py\`:
 - Heading is radians anticlockwise from world +X.
 - The Robot origin and GPS reference are at the centre of the rear axle.
 - Vehicle wheelbase: 2.8 m; body: 4.6 m × 1.9 m; rear overhang: 1.0 m.
-- Front wheel steering motors are separate so M4 can apply Ackermann inner/outer angles.
-- The model exposes four wheel motors and two front steering motors. The M1 controller holds all wheel motors at zero.
+- The current Webots Robot is a rigid-body sensor platform with the agreed footprint and rear-axle reference. It is not yet a dynamic four-wheel Ackermann vehicle; wheel joints, steering joints and motor devices remain to be added during M4 integration.
 
 These dimensions intentionally match M2's current \`VehicleParams\` placeholders and M3's documented \`VehicleGeometry\`. Measure the final physical/model geometry before claiming calibrated results.
 
