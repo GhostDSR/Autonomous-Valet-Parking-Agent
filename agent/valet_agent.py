@@ -30,6 +30,7 @@ Life cycle of a run:
     DONE / FAILED
 """
 
+import dataclasses
 import math
 from dataclasses import dataclass
 
@@ -53,8 +54,11 @@ from planner.vehicle import CollisionChecker, VehicleParams
 class AgentConfig:
     method: str = "hybrid_astar"     # M2 planner: "hybrid_astar" | "astar_smoothed" | "astar"
     lateral: str = "stanley_ff"      # M4 steering: "stanley_ff" | "stanley" | "pure_pursuit"
-    cruise_speed: float = 1.5        # m/s on the route (M3's stopping-distance check needs it low)
+    cruise_speed: float = 1.0        # m/s on the route; M3 wants 0.85 m clear ahead at this speed
+    reverse_speed: float = 0.5       # m/s when the route reverses (tight turns track badly faster)
+    planning_margin_m: float = 0.4   # extra clearance the route keeps, for path-tracking error
     replan_period_s: float = 1.0     # how often the route is re-checked while driving
+    retry_period_s: float = 5.0      # wait after a failed plan before trying again
     lidar_fov: float = 2 * math.pi
     lidar_max_range: float = 40.0
     obstacle_radius_m: float = 10.0  # only lidar points this close can become new obstacles
@@ -114,9 +118,16 @@ class ValetAgent:
         self.geometry = geometry
         self.config = config or AgentConfig()
         # The planner and M3 describe the same car with different classes.
+        # Routes keep `planning_margin_m` from obstacles, because the car does
+        # not follow them exactly (it cuts corners a little, more in reverse).
+        # If the car has stopped somewhere tight, that margin can make every
+        # route look blocked, so planning falls back to no extra margin.
         self.vehicle = VehicleParams(wheelbase=geometry.wheelbase_m, max_steer=geometry.max_steer_rad,
                                      length=geometry.length_m, width=geometry.width_m,
-                                     rear_overhang=geometry.rear_overhang_m)
+                                     rear_overhang=geometry.rear_overhang_m,
+                                     safety_margin=self.config.planning_margin_m)
+        self.tight_vehicle = dataclasses.replace(self.vehicle, safety_margin=0.0)
+        self.route_vehicle = self.vehicle   # the one the current route was planned with
         self.slots = make_slots()
         self.fsm = ParkingFSM(geometry, ParkingManoeuvre(geometry))
         # Hybrid A* with an exact final approach: M3 needs the route to end
@@ -126,7 +137,8 @@ class ValetAgent:
         # (radius at 85 % steering, see behaviours/parking_manoeuvre.py), plus a margin.
         self.setup_distance_m = geometry.wheelbase_m / math.tan(0.85 * geometry.max_steer_rad) + 0.3
         self.follower_cfg = FollowerConfig(max_steer=geometry.max_steer_rad,
-                                           v_fwd=self.config.cruise_speed)
+                                           v_fwd=self.config.cruise_speed,
+                                           v_rev=self.config.reverse_speed)
 
         self.slot_status = {}        # slot id -> "free" / "occupied", from the lidar
         self.obstacles = []          # new obstacles seen by the lidar: (cx, cy, l, w, yaw)
@@ -139,6 +151,8 @@ class ValetAgent:
         self.excluded = set()        # slots we gave up on
         self.events = []             # (time, text) log for the report / video
         self.plans = []              # every route planned: (time, slot id, path)
+        self.plan_pose = (0.0, 0.0, 0.0)  # where the car was when the current route was planned
+        self.stuck_count = 0         # emergency stops in a row without the car moving
 
     # ------------------------------------------------------------ sensing (M1)
 
@@ -183,23 +197,28 @@ class ValetAgent:
     def _plan(self, now_s, pose, same_slot=None):
         """Plan from `pose`, to `same_slot` if given and still reachable, else to the best free slot."""
         grid_map = build_map(self.occupied(), self.obstacles)[0]
-        checker = CollisionChecker(grid_map, self.vehicle)
         choice = None
-        if same_slot and same_slot not in self.occupied():
-            path, stats, goal = plan_to_slot(grid_map, pose, self.slots[same_slot],
-                                             self.config.method, self.vehicle, self.planner_config,
-                                             checker, setup_distance_m=self.setup_distance_m)
-            if path:
-                choice = SlotChoice(same_slot, path, stats, goal, [same_slot])
-        if choice is None:
-            choice = choose_slot(grid_map, pose, self.slots, self.free_slots(), self.config.method,
-                                 self.vehicle, self.planner_config, checker,
-                                 setup_distance_m=self.setup_distance_m)
+        for vehicle in (self.vehicle, self.tight_vehicle):   # wide margin first
+            checker = CollisionChecker(grid_map, vehicle)
+            if same_slot and same_slot not in self.occupied():
+                path, stats, goal = plan_to_slot(grid_map, pose, self.slots[same_slot],
+                                                 self.config.method, vehicle, self.planner_config,
+                                                 checker, setup_distance_m=self.setup_distance_m)
+                if path:
+                    choice = SlotChoice(same_slot, path, stats, goal, [same_slot])
+            if choice is None:
+                choice = choose_slot(grid_map, pose, self.slots, self.free_slots(),
+                                     self.config.method, vehicle, self.planner_config, checker,
+                                     setup_distance_m=self.setup_distance_m)
+            if choice is not None:
+                self.route_vehicle = vehicle
+                break
         if choice is None:
             return False
 
         self.choice = choice
         self.plans.append((now_s, choice.slot_id, choice.path))
+        self.plan_pose = pose
         self.progress = 0
         lateral = {"pure_pursuit": PurePursuit, "stanley": Stanley,
                    "stanley_ff": lambda L: Stanley(L=L, use_ff=True)}[self.config.lateral]
@@ -245,7 +264,8 @@ class ValetAgent:
 
             if self.phase == "DRIVE":
                 self.progress = nearest_index(self.choice.path, pose, self.progress)
-                checker = CollisionChecker(build_map(self.occupied(), self.obstacles)[0], self.vehicle)
+                checker = CollisionChecker(build_map(self.occupied(), self.obstacles)[0],
+                                           self.route_vehicle)
                 reason = check_route(self.choice, self.progress, self.occupied(), checker)
                 if reason:
                     self.phase, self.reason = "STOPPING", reason
@@ -254,7 +274,10 @@ class ValetAgent:
             if self.phase in ("SEARCH", "STOPPING") and stopped:
                 previous = self.choice.slot_id if self.choice else None
                 if not self._plan(now_s, pose, same_slot=previous):
+                    # Planning failed (e.g. a pedestrian blocks the way). A failed
+                    # search is slow, so wait a few seconds before trying again.
                     self.reason = "no reachable free slot yet; waiting"
+                    self.next_check_s = now_s + self.config.retry_period_s
 
         if self.phase == "STOPPING" and not stopped:
             self.next_check_s = now_s     # plan as soon as the car stands still
@@ -278,9 +301,18 @@ class ValetAgent:
             cmd = ParkingCommand(ParkingState.DRIVE, ControlMode.STOP, 0.0, reason=self.reason)
         elif cmd.state == ParkingState.EMERGENCY_STOP and before == ParkingState.DRIVE:
             # M3's reflex stopped the car on the route: once stopped, plan round the obstacle.
-            self.phase, self.reason = "STOPPING", "emergency stop on the route: " + self.fsm.reason
-            self._log(now_s, self.reason)
-            self.next_check_s = now_s           # re-plan as soon as the car stands still
+            moved = math.hypot(pose[0] - self.plan_pose[0], pose[1] - self.plan_pose[1])
+            self.stuck_count = self.stuck_count + 1 if moved < 0.1 else 0
+            if self.stuck_count >= 3:
+                # Every new route is stopped again before the car moves: it is
+                # boxed in (M3 allows no motion with an obstacle this close).
+                self.phase = "FAILED"
+                self.reason = "boxed in: " + self.fsm.reason
+                self._log(now_s, self.reason)
+            else:
+                self.phase, self.reason = "STOPPING", "emergency stop on the route: " + self.fsm.reason
+                self._log(now_s, self.reason)
+                self.next_check_s = now_s       # re-plan as soon as the car stands still
         elif cmd.state in (ParkingState.ALIGN, ParkingState.PARK):
             self.phase = cmd.state.name
         elif cmd.state in (ParkingState.DONE, ParkingState.FAILED, ParkingState.EMERGENCY_STOP):
