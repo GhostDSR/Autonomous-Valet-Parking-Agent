@@ -57,7 +57,7 @@ def build_map(occupied, extra_obstacles=(), resolution=0.25):
 
 # ---------------------------------------------------------------- slot choice
 
-def rank_slots(grid_map, start_pose, slots, free_ids, checker, exclude=()):
+def rank_slots(grid_map, start_pose, slots, free_ids, checker, exclude=(), setup_distance_m=0.0):
     """
     Order the free slots from best to worst using FAST grid A*.
 
@@ -73,7 +73,8 @@ def rank_slots(grid_map, start_pose, slots, free_ids, checker, exclude=()):
         if sid in exclude:
             continue
         path, stats, _ = plan_to_slot(grid_map, start_pose, slots[sid], "astar",
-                                      checker.vehicle, None, checker)
+                                      checker.vehicle, None, checker,
+                                      setup_distance_m=setup_distance_m)
         if path:
             ranked.append((stats["cost"], sid))
     ranked.sort()
@@ -81,7 +82,7 @@ def rank_slots(grid_map, start_pose, slots, free_ids, checker, exclude=()):
 
 
 def choose_slot(grid_map, start_pose, slots, free_ids, method="hybrid_astar",
-                vehicle=None, config=None, checker=None, exclude=()):
+                vehicle=None, config=None, checker=None, exclude=(), setup_distance_m=0.0):
     """
     Pick a free slot and plan the route to it.
 
@@ -91,16 +92,19 @@ def choose_slot(grid_map, start_pose, slots, free_ids, method="hybrid_astar",
 
     free_ids : ids of the free slots (from M1's free-slot detector)
     exclude  : ids to skip, e.g. a slot we already failed to park in
+    setup_distance_m : see plan_to_slot
     Returns a SlotChoice, or None if no free slot can be reached.
     """
     vehicle = vehicle or VehicleParams()
     checker = checker or CollisionChecker(grid_map, vehicle)
 
     tried = []
-    for _, sid in rank_slots(grid_map, start_pose, slots, free_ids, checker, set(exclude)):
+    for _, sid in rank_slots(grid_map, start_pose, slots, free_ids, checker, set(exclude),
+                             setup_distance_m):
         tried.append(sid)
         path, stats, goal = plan_to_slot(grid_map, start_pose, slots[sid], method,
-                                         vehicle, config, checker)
+                                         vehicle, config, checker,
+                                         setup_distance_m=setup_distance_m)
         if path:
             return SlotChoice(sid, path, stats, goal, tried)
     return None
@@ -151,7 +155,8 @@ def check_route(choice, progress_index, occupied, checker):
 
 
 def replan(current_pose, choice, progress_index, occupied, extra_obstacles=(),
-           method="hybrid_astar", vehicle=None, config=None, resolution=0.25):
+           method="hybrid_astar", vehicle=None, config=None, resolution=0.25,
+           setup_distance_m=0.0):
     """
     Re-check the plan against the latest sensor picture and plan again if needed.
 
@@ -177,11 +182,13 @@ def replan(current_pose, choice, progress_index, occupied, extra_obstacles=(),
 
     if choice.slot_id not in occupied:
         path, stats, goal = plan_to_slot(grid_map, current_pose, slots[choice.slot_id],
-                                         method, vehicle, config, checker)
+                                         method, vehicle, config, checker,
+                                         setup_distance_m=setup_distance_m)
         if path:
             return SlotChoice(choice.slot_id, path, stats, goal, [choice.slot_id]), reason
 
     free_ids = [sid for sid in slots if sid not in occupied]
     new_choice = choose_slot(grid_map, current_pose, slots, free_ids, method,
-                             vehicle, config, checker, exclude={choice.slot_id})
+                             vehicle, config, checker, exclude={choice.slot_id},
+                             setup_distance_m=setup_distance_m)
     return new_choice, reason

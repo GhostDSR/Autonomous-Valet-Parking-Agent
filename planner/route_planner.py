@@ -18,6 +18,7 @@ Three methods are available, all returning the same format:
     "hybrid_astar"    Hybrid A* (respects the turning radius)  <- default
 """
 
+import math
 import time
 
 from planner.astar import astar
@@ -78,7 +79,7 @@ def plan_route(grid_map, start_pose, goal_pose, method="hybrid_astar", **kwargs)
 
 
 def plan_to_slot(grid_map, start_pose, slot, method="hybrid_astar",
-                 vehicle=None, config=None, checker=None, offset=3.0):
+                 vehicle=None, config=None, checker=None, offset=3.0, setup_distance_m=0.0):
     """
     Plan from start_pose to the pre-park pose of `slot` (see
     parking_lot.pre_park_poses). Both directions along the aisle are tried and
@@ -87,6 +88,11 @@ def plan_to_slot(grid_map, start_pose, slot, method="hybrid_astar",
 
     Note: grid A* ignores heading, so it may pick the goal that faces the
     "wrong" way along the aisle simply because it is closer.
+
+    setup_distance_m: before reversing in, M3 drives forward until the rear
+    axle is about this far past the bay centre (its turning radius). If > 0,
+    a direction is skipped when the car would not fit there - e.g. driving
+    towards the wall at the end of an aisle. 0 = no check.
 
     Returns (path, stats, goal_pose). If no route exists, path is [] and
     goal_pose is None. stats['time_s'] and stats['nodes_expanded'] are summed
@@ -98,6 +104,11 @@ def plan_to_slot(grid_map, start_pose, slot, method="hybrid_astar",
     best = None
     total_time, total_nodes = 0.0, 0
     for goal in pre_park_poses(slot, offset):
+        if setup_distance_m > 0:
+            gx, gy, gyaw = goal
+            setup = (slot.x + setup_distance_m * math.cos(gyaw), gy, gyaw)
+            if checker.pose_collides(*setup):
+                continue  # no room to set up the reverse manoeuvre this way
         try:
             path, stats = plan_route_with_stats(grid_map, start_pose, goal, method,
                                                 vehicle, config, checker)

@@ -122,6 +122,9 @@ class ValetAgent:
         # Hybrid A* with an exact final approach: M3 needs the route to end
         # precisely on the pre-park pose (see planner/final_approach.py).
         self.planner_config = HybridAStarConfig(final_approach_m=5.0)
+        # M3 drives about one turning radius past the bay before reversing in
+        # (radius at 85 % steering, see behaviours/parking_manoeuvre.py), plus a margin.
+        self.setup_distance_m = geometry.wheelbase_m / math.tan(0.85 * geometry.max_steer_rad) + 0.3
         self.follower_cfg = FollowerConfig(max_steer=geometry.max_steer_rad,
                                            v_fwd=self.config.cruise_speed)
 
@@ -185,12 +188,13 @@ class ValetAgent:
         if same_slot and same_slot not in self.occupied():
             path, stats, goal = plan_to_slot(grid_map, pose, self.slots[same_slot],
                                              self.config.method, self.vehicle, self.planner_config,
-                                             checker)
+                                             checker, setup_distance_m=self.setup_distance_m)
             if path:
                 choice = SlotChoice(same_slot, path, stats, goal, [same_slot])
         if choice is None:
             choice = choose_slot(grid_map, pose, self.slots, self.free_slots(), self.config.method,
-                                 self.vehicle, self.planner_config, checker)
+                                 self.vehicle, self.planner_config, checker,
+                                 setup_distance_m=self.setup_distance_m)
         if choice is None:
             return False
 
