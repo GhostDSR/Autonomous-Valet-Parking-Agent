@@ -57,14 +57,15 @@ class TestFinalApproach(unittest.TestCase):
 
 
 class TestPreParkPose(unittest.TestCase):
-    def test_pre_park_pose_is_shifted_away_from_the_bay(self):
+    def test_pre_park_pose_stands_off_from_the_bay(self):
         slots = make_slots()
         for sid in ("A3", "B3", "C3", "D3"):
             s = slots[sid]
-            for _, y, _ in pre_park_poses(s):
-                # further from the bay row than the aisle centre line, by 0.5 m
-                self.assertAlmostEqual(abs(y - s.y), abs(s.aisle_y - s.y) + 0.5)
-
+            for x, y, yaw in pre_park_poses(s):
+                # 4 m out from the bay entrance line, on the aisle side
+                self.assertAlmostEqual(abs(y - s.y), 2.5 + 4.0)
+                self.assertEqual((y - s.y) > 0, s.aisle_y > s.y)
+                self.assertAlmostEqual(abs(x - s.x), 3.0)
 
 if __name__ == "__main__":
     unittest.main()

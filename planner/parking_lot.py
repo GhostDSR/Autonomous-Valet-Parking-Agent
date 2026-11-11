@@ -10,8 +10,9 @@ same lot: same origin, same axis directions, same bay positions and ids.
 Layout (top view, x to the right, y up, origin at the bottom-left corner):
 
     y=34 +--------------------------------------------------+
+ y=33.5  |        +-----------------------------+           |
          |        | D0 D1 D2 ... D9 (nose -y)   |           |   row D
-    y=29 |        +-----------------------------+           |
+ y=28.5  |        +-----------------------------+           |
          |  left  |          aisle 2            |   right   |
     y=22 |  lane  +-----------------------------+   lane    |
          |        | C0 C1 C2 ... C9 (nose +y)   |           |   row C  } island
@@ -19,8 +20,9 @@ Layout (top view, x to the right, y up, origin at the bottom-left corner):
     y=12 |        +-----------------------------+           |
     y=11 =  entrance       aisle 1                          |
     y=6  =  (gap in wall)                                   |
-    y=5  |        +-----------------------------+           |
+  y=5.5  |        +-----------------------------+           |
          |        | A0 A1 A2 ... A9 (nose +y)   |           |   row A
+  y=0.5  |        +-----------------------------+           |
     y=0  +--------------------------------------------------+
         x=0      x=8                          x=33         x=40
 
@@ -56,11 +58,14 @@ PARKED_CAR_LENGTH = 4.5
 PARKED_CAR_WIDTH = 1.9
 
 # (row name, y of the row's bottom edge, heading of a parked car, y of the aisle centre)
+# Rows A and D stand 0.5 m off the outer wall (0.25 m from its inner face):
+# a 4.6 m car centred in a 5 m bay ends 0.2 m from the bay's back line, and
+# with the bay starting at the wall itself its rear would be inside the wall.
 ROWS = [
-    ("A", 0.0, math.pi / 2, 8.5),
+    ("A", 0.5, math.pi / 2, 8.5),
     ("B", 12.0, -math.pi / 2, 8.5),
     ("C", 17.0, math.pi / 2, 25.5),
-    ("D", 29.0, -math.pi / 2, 25.5),
+    ("D", 28.5, -math.pi / 2, 25.5),
 ]
 
 # Where the car starts: just inside the entrance, facing into the lot.
@@ -145,7 +150,7 @@ def free_slots(slots, occupied=None):
     return sorted(sid for sid in slots if sid not in occupied)
 
 
-def pre_park_poses(slot, offset=3.0, lateral_shift=0.5):
+def pre_park_poses(slot, offset=3.0, standoff=4.0):
     """
     Candidate goal poses for the route planner.
 
@@ -159,19 +164,18 @@ def pre_park_poses(slot, offset=3.0, lateral_shift=0.5):
       - driving in +x : stop `offset` m past the bay, heading 0
       - driving in -x : stop `offset` m before the bay, heading pi
 
-    Why `lateral_shift` (the car stops 0.5 m off the aisle centre line, AWAY
-    from the bay row): M3 reverses in on a quarter circle of radius
+    Sideways, the car stops `standoff` m out from the bay's entrance line.
+    Why 4 m: M3 reverses in on a quarter circle of radius
     R = L / tan(0.85 * max_steer) = 6.19 m that starts where the car stands.
     The parked car in the next bay is on the inside of that turn, so all of
     it must stay within the innermost circle the body sweeps, radius
-    R - width/2 = 5.24 m. From the centre line its far corner is 5.24 m from
-    the circle's centre: a gap of zero. Starting 0.5 m further out moves the
-    circle's centre away and the corner is 5.03 m from it: a 0.21 m gap, with
+    R - width/2 = 5.24 m. Stopping 3.5 m out (the aisle centre line) leaves
+    a gap of zero to that car's far corner; 4 m out leaves about 0.2 m, with
     the outer side of the swing still clear of the row across the aisle.
     Worked out for the placeholder car; recheck if the car changes.
     """
-    away_from_bay = -1.0 if slot.y > slot.aisle_y else 1.0
-    y = slot.aisle_y + away_from_bay * lateral_shift
+    towards_aisle = 1.0 if slot.aisle_y > slot.y else -1.0
+    y = slot.y + towards_aisle * (BAY_DEPTH / 2 + standoff)
     return [
         (slot.x + offset, y, 0.0),
         (slot.x - offset, y, math.pi),
