@@ -145,22 +145,34 @@ def free_slots(slots, occupied=None):
     return sorted(sid for sid in slots if sid not in occupied)
 
 
-def pre_park_poses(slot, offset=3.0):
+def pre_park_poses(slot, offset=3.0, lateral_shift=0.5):
     """
     Candidate goal poses for the route planner.
 
     The planner does NOT drive into the bay itself. It brings the car to a
-    "pre-park" pose on the aisle centre line, just past the bay, facing
-    along the aisle. From there the reactive parking manoeuvre (M3) reverses
-    the car into the bay. This is the deliberative / reactive split from the
-    problem statement.
+    "pre-park" pose on the aisle, just past the bay, facing along the aisle.
+    From there the reactive parking manoeuvre (M3) reverses the car into the
+    bay. This is the deliberative / reactive split from the problem statement.
 
     Two candidates are returned, one for each direction of travel along the
     aisle (the cheaper one is chosen by the route planner):
       - driving in +x : stop `offset` m past the bay, heading 0
       - driving in -x : stop `offset` m before the bay, heading pi
+
+    Why `lateral_shift` (the car stops 0.5 m off the aisle centre line, AWAY
+    from the bay row): M3 reverses in on a quarter circle of radius
+    R = L / tan(0.85 * max_steer) = 6.19 m that starts where the car stands.
+    The parked car in the next bay is on the inside of that turn, so all of
+    it must stay within the innermost circle the body sweeps, radius
+    R - width/2 = 5.24 m. From the centre line its far corner is 5.24 m from
+    the circle's centre: a gap of zero. Starting 0.5 m further out moves the
+    circle's centre away and the corner is 5.03 m from it: a 0.21 m gap, with
+    the outer side of the swing still clear of the row across the aisle.
+    Worked out for the placeholder car; recheck if the car changes.
     """
+    away_from_bay = -1.0 if slot.y > slot.aisle_y else 1.0
+    y = slot.aisle_y + away_from_bay * lateral_shift
     return [
-        (slot.x + offset, slot.aisle_y, 0.0),
-        (slot.x - offset, slot.aisle_y, math.pi),
+        (slot.x + offset, y, 0.0),
+        (slot.x - offset, y, math.pi),
     ]
