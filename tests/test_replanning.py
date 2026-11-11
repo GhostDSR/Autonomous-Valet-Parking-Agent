@@ -73,18 +73,19 @@ class TestSlotChoice(unittest.TestCase):
 
 class TestReplan(unittest.TestCase):
     def setUp(self):
-        grid, slots = build_map(DEFAULT_OCCUPIED)
-        self.choice = choose_slot(grid, ENTRANCE_POSE, slots,
-                                  free_ids(slots, DEFAULT_OCCUPIED), method="astar")
+        # A straight route along aisle 1 to B3's pre-park pose (19.75, 8.0, 0).
+        path = [(10.0 + 0.25 * i, 8.0, 0.0) for i in range(40)]
+        self.choice = SlotChoice("B3", path, {"directions": [1] * len(path)}, path[-1])
+        self.start = path[0]
 
     def test_nothing_changed_keeps_plan(self):
-        new, reason = replan(ENTRANCE_POSE, self.choice, 0, DEFAULT_OCCUPIED, method="astar")
+        new, reason = replan(self.start, self.choice, 0, DEFAULT_OCCUPIED, method="astar")
         self.assertIs(new, self.choice)
         self.assertIsNone(reason)
 
     def test_slot_taken_picks_another_slot(self):
         occupied = DEFAULT_OCCUPIED | {self.choice.slot_id}
-        new, reason = replan(ENTRANCE_POSE, self.choice, 0, occupied, method="astar")
+        new, reason = replan(self.start, self.choice, 0, occupied, method="astar")
         self.assertIn("occupied", reason)
         self.assertNotEqual(new.slot_id, self.choice.slot_id)
         self.assertNotIn(new.slot_id, occupied)
