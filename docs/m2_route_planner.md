@@ -31,6 +31,28 @@ for (x, y, heading), direction in zip(path, stats["directions"]):
 - To plan to any pose instead of a slot, use `plan_route(grid_map, start, goal_pose)`.
 - `method="astar"` or `method="astar_smoothed"` return the same format. They exist for the comparison and are not drivable in general.
 
+## Choosing a slot and replanning
+
+The integrated controller does not have to pick the slot itself:
+
+```python
+from planner import build_map, choose_slot, nearest_index, replan
+
+grid_map, slots = build_map(occupied)                  # occupied = ids M1 sees as taken
+free = [sid for sid in slots if sid not in occupied]
+choice = choose_slot(grid_map, start, slots, free)     # SlotChoice: slot_id, path, stats, goal
+
+# every second or so, while driving the route:
+i = nearest_index(choice.path, current_pose, i)        # how far along the route the car is
+new, reason = replan(current_pose, choice, i, occupied, extra_obstacles)
+if reason:                                             # slot taken or route blocked
+    choice = new                                       # None = nothing reachable: wait and retry
+```
+
+- `choose_slot` ranks all free slots by grid-A* route length (a few ms each), then runs Hybrid A* on the best one, falling back to the next if it has no drivable route. About 1–1.5 s in total.
+- `replan` keeps the plan if nothing changed. If the route is blocked but the slot is still free, it plans a new route to the same slot. If the slot was taken or can no longer be reached, it picks a new slot.
+- `extra_obstacles` are `(cx, cy, length, width, yaw)` rectangles, for example a pedestrian seen by the lidar.
+
 ## Coordinate frame (proposed)
 
 Webots ENU (the default since R2022a): x and y on the ground, z up. Heading is measured anticlockwise from +x, in radians. Origin is the bottom-left corner of the lot. The car's reference point is the **centre of the rear axle**.
