@@ -11,7 +11,7 @@ A car-like (Ackermann-steering) vehicle that finds a free slot in a parking lot 
 
 | Member | SAP ID | Module |
 |---|---|---|
-| Devansh Singh Rawat | 500124378 | TBD |
+| Devansh Singh Rawat | 500124378 | World Sensors |
 | Mohammad Shahvez | 500124132 | M4 – Control + Results |
 | Harshil Mittal | 500121907 | M3 – Parking Manoeuvres |
 | Bhavya Talwar | 500121992 | M2 – Route Planner |

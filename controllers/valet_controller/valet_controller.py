@@ -1,8 +1,11 @@
 """M1 Webots sensor bring-up controller.
 
 This controller is deliberately sensor-only: M4 is the single owner of
-vehicle commands. It enables the M1 devices, publishes pose/clearances and
-slot classifications, and holds the Ackermann actuators at zero.
+vehicle commands. It enables the M1 devices and publishes pose, clearances
+and slot classifications. It never touches the steering or wheel motors
+(front_left_steer, front_right_steer, *_wheel_motor), which are left
+unactuated. To check the actuators themselves, temporarily set the car's
+controller to ``m1_actuator_check``.
 """
 import json
 import math
@@ -20,6 +23,7 @@ from controllers.valet_controller.m1_sensors import (
     classify_slots_from_scan,
     compass_yaw,
     lidar_points_world,
+    webots_ranges_to_ccw,
 )
 
 
@@ -40,7 +44,7 @@ def main():
         sensor.enable(timestep)
         distance_sensors[name] = sensor
 
-    # M1 is sensor-only; M4 will own actuator devices and motion commands.
+    # M1 is sensor-only; M4 owns the actuator devices and all motion commands.
 
     last_report = -1.0
     while robot.step(timestep) != -1:
@@ -52,7 +56,9 @@ def main():
         gps_values = gps.getValues()
         yaw = compass_yaw(compass.getValues())
         pose = (float(gps_values[0]), float(gps_values[1]), yaw)
-        ranges = lidar.getRangeImage()
+        # Webots returns the scan clockwise (sample 0 = sensor's left); the
+        # M1 helpers expect counter-clockwise from -FOV/2 to +FOV/2.
+        ranges = webots_ranges_to_ccw(lidar.getRangeImage())
         fov = 2.0 * math.pi
         max_range = float(lidar.getMaxRange())
 
