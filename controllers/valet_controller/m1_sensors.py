@@ -134,6 +134,20 @@ def classify_slots_from_scan(
     return result
 
 
+def _distance_to_footprint(
+    px: float, py: float, front_extent: float, rear_extent: float, half_width: float
+) -> float:
+    """Shortest distance from point (px, py) to the vehicle footprint rectangle.
+
+    The footprint spans x in [-rear_extent, front_extent] and y in
+    [-half_width, half_width] in the body frame (origin = rear axle).
+    Returns 0 for a point inside the footprint.
+    """
+    dx = max(-rear_extent - px, 0.0, px - front_extent)
+    dy = max(abs(py) - half_width, 0.0)
+    return math.hypot(dx, dy)
+
+
 def body_clearances_from_scan(
     ranges: Sequence[float],
     pose: Pose2D,
@@ -145,9 +159,17 @@ def body_clearances_from_scan(
 ) -> Dict[str, float | None]:
     """Estimate front/rear/left/right body clearances from a 360-degree scan.
 
-    The LiDAR origin is at the rear-axle reference point. The support distance
-    of the rectangular vehicle footprint is subtracted from each ray range.
-    A missing sector returns None; callers must not invent a large clearance.
+    ``ranges`` must be in counter-clockwise order from -FOV/2 to +FOV/2 (use
+    ``webots_ranges_to_ccw`` on a raw Webots range image). The LiDAR origin
+    is at the rear-axle reference point. Each return is assigned to the
+    sector (front/left/rear/right) whose centre ray it is closest to, and the
+    clearance of a sector is the smallest straight-line distance from any hit
+    point in that sector to the rectangular vehicle footprint. A missing
+    sector returns None; callers must not invent a large clearance.
+
+    (An earlier version subtracted the footprint's support function from the
+    ray range. That over-subtracted on oblique rays, so a wall exactly 10 m
+    in front of the axle reported 6.28 m instead of 6.4 m.)
     """
     if len(ranges) < 2:
         return {"front": None, "rear": None, "left": None, "right": None}
@@ -163,23 +185,25 @@ def body_clearances_from_scan(
         if not math.isfinite(distance) or distance <= 0:
             continue
         local_angle = -field_of_view / 2.0 + index * step
+        px, py = distance * math.cos(local_angle), distance * math.sin(local_angle)
+        clearance = _distance_to_footprint(px, py, front_extent, rear_extent, half_width)
         for name, centre_angle in sectors.items():
             delta = (local_angle - centre_angle + math.pi) % (2 * math.pi) - math.pi
             if abs(delta) > sector_half_angle:
                 continue
-            c, s = math.cos(local_angle), math.sin(local_angle)
-            support_x = front_extent if c >= 0 else rear_extent
-            support = support_x * abs(c) + half_width * abs(s)
-            clearance = max(0.0, distance - support)
             if minima[name] is None or clearance < minima[name]:
                 minima[name] = clearance
     return minima
 
 
 def compass_yaw(compass_values: Sequence[float]) -> float:
-    """Convert Webots compass north vector to ENU heading (CCW from world +X).
+    """Convert a Webots compass reading to ENU heading (CCW from world +X).
 
-    This assumes world +Y is north and the robot's local +X is forward.
+    Webots returns the world "north" direction expressed in the compass's own
+    frame (x forward, y left, z up). In an ENU world north is world +Y, so for
+    a robot with heading psi the reading is (sin psi, cos psi) and
+    psi = atan2(north_x, north_y). The compass must be mounted un-rotated on
+    the Robot, as in worlds/parking_lot.wbt.
     """
     if len(compass_values) < 2:
         raise ValueError("compass must provide at least two components")
@@ -188,4 +212,15 @@ def compass_yaw(compass_values: Sequence[float]) -> float:
         raise ValueError("invalid compass vector")
     if math.hypot(north_x, north_y) < 1e-9:
         raise ValueError("zero compass vector")
-    return math.atan2(-north_x, north_y)
+    return math.atan2(north_x, north_y)
+
+
+def webots_ranges_to_ccw(ranges: Sequence[float]) -> List[float]:
+    """Reorder a raw Webots Lidar range image to counter-clockwise order.
+
+    Webots returns the horizontal samples from the sensor's left to its right
+    (clockwise: sample 0 is at +FOV/2, the last sample at -FOV/2). Every
+    function in this module expects counter-clockwise order from -FOV/2 to
+    +FOV/2, so the controller must pass the raw image through this first.
+    """
+    return list(reversed(list(ranges)))
