@@ -44,9 +44,9 @@ python -m unittest discover -s tests   # all tests
 
 In Webots, set the car's `controller` field to `valet_agent`. The world needs:
 
-- The car must be a Webots `Car` / `AckermannVehicle`, so that `vehicle.Driver` works. The controller uses M4's `DriverCar` adapter for steering, throttle, brake and gear.
-- The devices must be named `gps`, `compass` and `lidar` (360°, one layer). The GPS must sit at the rear-axle centre.
-- Run M4's calibrate mode once to confirm the steering sign.
+- It uses the devices M1 added in #11: `gps`, `compass`, `lidar`, the four `*_wheel_motor`s and the two `front_*_steer` motors.
+- The wheel motors are velocity controlled, so the controller sends M4's speed reference and steering angle, converted to wheel speeds and Ackermann angles with M1's helpers.
+- Run `m1_actuator_check` once first, to confirm the motor signs in your Webots version.
 
 ## Agent settings that matter (`AgentConfig`)
 
@@ -70,15 +70,16 @@ These came out of running the whole chain. They are all in `planner/`.
 
 ## For teammates: issues found while integrating
 
+Fixed by M1 in #11: motors and steering on the car, the clearance formula and its test, the compass sign, and the lidar scan order. The integrated controller now uses `compass_yaw`, `webots_ranges_to_ccw`, `ackermann_angles` and `wheel_speeds` from M1.
+
+Still open:
+
 | Owner | Issue | Suggested fix |
 |---|---|---|
-| **M1 (Devansh)** | `worlds/parking_lot.wbt` still has rows A and D against the wall. | Move rows A and D (bay lines and parked cars) 0.5 m away from the wall: row A centre y 2.5 → 3.0, row D centre y 31.5 → 31.0. This matches `planner/parking_lot.py`. |
-| **M1** | The car has no wheels, steering or motors. | Make it a `Car` / `AckermannVehicle` (Driver API). Wheelbase 2.8 m, max steer 0.5 rad, as in `planner/vehicle.py`. |
-| **M1** | `body_clearances_from_scan` subtracts `front·\|cos\| + half_width·\|sin\|`. This is a safe lower bound, but very loose for side rays: with a car 0.6 m beside ours it reports 0 m, so M3 stops the car in every bay that has a neighbour. | Use the exact distance from each lidar point to the car rectangle, as in `body_clearances` in `agent/valet_agent.py`. The agent uses that version for now. |
-| **M1** | `test_body_clearance_subtracts_vehicle_footprint` expects 6.4 m. With obstacles 10 m away all round, the nearest are off the front corners, so the true gap is `10 − hypot(3.6, 0.95) = 6.28` m. | Fix the expected value. The function's 6.277 is right for this case. |
+| **M1 (Devansh)** | `worlds/parking_lot.wbt` still has rows A and D against the outer wall. | Move rows A and D (bay lines and parked cars) 0.5 m away from the wall: row A centre y 2.5 → 3.0, row D centre y 31.5 → 31.0. This matches `planner/parking_lot.py`. |
 | **M1** | `classify_slots_from_scan` pads each bay by 0.2 m. For bays backed by a wall, rays that hit the wall land inside the padded box, so free A/D bays read as occupied. | Use less padding along the bay depth, or ignore returns beyond the bay's back line. |
-| **M1** | `compass_yaw` returns `atan2(−n_x, n_y)`. For a car with heading yaw, the compass reads north as `(sin yaw, cos yaw)`, so the heading is `atan2(n_x, n_y)`. M4's adapter already uses that. | Flip the sign. Confirm with M4's calibrate mode. |
-| **M1** | Check that Webots' lidar range image runs from −FOV/2 to +FOV/2, as `m1_sensors.py` assumes. Webots may order it the other way. | Check once in Webots with an object on the car's left. |
+| **M1** | `body_clearances_from_scan` only covers ±25° around each axis, so obstacles off the corners are missed. A side with no return gives `None`, which M3 treats as a fault. | Assign each point to its nearest side, and report "no return" as clear to max range (see `body_clearances` in `agent/valet_agent.py`). |
+| **M3 / M4** | Six bays at the ends of the aisles still fail in the sweep. | See Results. |
 
 ## Results
 

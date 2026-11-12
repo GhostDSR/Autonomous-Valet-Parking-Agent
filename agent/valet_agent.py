@@ -83,11 +83,13 @@ def body_clearances(ranges, field_of_view, front_extent, rear_extent, half_width
     beside the front wheel counts as "left", not "front"), so the corners are
     covered as well.
 
-    Why not M1's body_clearances_from_scan: it subtracts the body's extent in
-    the ray's direction (front_extent*|cos| + half_width*|sin|). That is a
-    safe lower bound but a very loose one for side rays - for a car parked
-    0.6 m beside us it reports 0 m - so M3 would stop the car in every bay
-    that has a neighbour. This is the exact distance instead.
+    How this differs from M1's body_clearances_from_scan (which now uses the
+    same exact distance): M1 only looks at rays within 25 degrees of straight
+    ahead, behind, left and right, so obstacles off the four corners are not
+    counted at all, and a side with no lidar return comes back as None,
+    which M3 treats as a sensor fault (e.g. the open entrance behind the car
+    at the start). Here every point counts for the side it is nearest, and a
+    side with no return within range is reported as clear up to max_range.
     """
     gaps = {"front": None, "rear": None, "left": None, "right": None}
     if len(ranges) < 2:
