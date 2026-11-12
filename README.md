@@ -38,10 +38,12 @@ A car-like (Ackermann-steering) vehicle that finds a free slot in a parking lot 
 Autonomous-Valet-Parking-Agent/
 ├── worlds/            # Webots world files (parking lot)
 ├── controllers/       # Webots Python controllers
-│   └── valet_controller/
-├── planner/           # A* / Hybrid A* route planner
+│   ├── valet_controller/   # M1 sensor bring-up
+│   └── valet_agent/        # whole agent (M1 -> M2 -> M3 -> M4)
+├── agent/             # the integrated agent + offline simulator
+├── planner/           # A* / Hybrid A* route planner, slot choice, replanning
 ├── behaviours/        # Parking state machine and reactive rules
-├── control/           # Path tracking and speed control
+├── m4_control/        # Path tracking and speed control
 ├── results/           # Plots, tables and experiment logs
 ├── docs/              # Report, slides and meeting log
 ├── requirements.txt
@@ -76,6 +78,16 @@ python planner/astar.py                  # small standalone A* demo with a plot
 python -m unittest discover -s tests     # planner unit tests
 python -m planner.compare_planners       # A* vs A* + smoothing vs Hybrid A* -> results/
 ```
+
+To run the **whole agent** offline (real M1–M4 code, simulated lidar and car), from the repository root:
+
+```bash
+python -m agent.run_offline              # normal / slot taken / pedestrian scenarios -> results/agent/
+python -m agent.run_offline --sweep      # also park in each of the 40 bays (about 10 min)
+```
+
+In Webots, the integrated controller is `controllers/valet_agent`. See [docs/integration.md](docs/integration.md) for how the modules connect and what the world still needs.
+
 ## M3 – Parking Manoeuvres
 
 Implemented by **Harshil Mittal**.

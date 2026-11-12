@@ -26,11 +26,13 @@ The Hybrid A* idea (Dolgov et al., 2010)
      h = distance-to-goal on the 2D grid around obstacles (a Dijkstra search
          run once from the goal), which guides the search along the aisles.
 5. The search stops when a state lands within a small position and heading
-   tolerance of the goal. The final precise alignment is left to the
-   reactive parking layer (M3).
+   tolerance of the goal. Optionally (config.final_approach_m > 0) it
+   instead searches to a point just before the goal and joins it to the
+   exact goal with a cubic curve (final_approach.py).
 
 Simplifications compared to the paper (keep in mind for the viva):
-- No analytic Reeds-Shepp "shot" to the goal; a goal tolerance is used instead.
+- No analytic Reeds-Shepp "shot" to the goal; a goal tolerance is used
+  instead, or the simpler cubic final approach.
 - Only the obstacle-aware 2D heuristic is used, not the non-holonomic
   (Reeds-Shepp) heuristic.
 - No post-optimisation (gradient smoothing) of the final path.
@@ -42,6 +44,7 @@ import math
 import time
 from dataclasses import dataclass
 
+from planner.final_approach import approach_point, connect_to_goal
 from planner.vehicle import CollisionChecker, VehicleParams, move, wrap_angle
 
 
@@ -69,6 +72,11 @@ class HybridAStarConfig:
     goal_xy_tolerance: float = 0.5      # m
     goal_yaw_tolerance_deg: float = 10.0
     max_expansions: int = 100_000
+
+    # Exact final approach (see final_approach.py). 0 = off: stop within the
+    # tolerance above. > 0: search to a point this many metres before the goal,
+    # then join it to the exact goal with a drivable cubic curve.
+    final_approach_m: float = 0.0
 
 
 class _Node:
@@ -212,6 +220,13 @@ def hybrid_astar(grid_map, start, goal, vehicle=None, config=None, checker=None)
         if checker.pose_collides(*pose):
             raise ValueError(f"{name} pose {pose} collides with an obstacle")
 
+    # With a final approach, the search aims for a point just before the goal.
+    final_goal = goal
+    if config.final_approach_m > 0:
+        goal = approach_point(final_goal, config.final_approach_m)
+        if checker.pose_collides(*goal):
+            raise ValueError(f"approach pose {goal} collides with an obstacle")
+
     h_grid = holonomic_heuristic(grid_map, goal[:2], config.heuristic_inflation)
 
     def h(x, y):
@@ -259,9 +274,17 @@ def hybrid_astar(grid_map, start, goal, vehicle=None, config=None, checker=None)
 
         if at_goal(node):
             path, directions = _reconstruct(node)
-            stats.update(cost=node.g, reached_goal=True, directions=directions,
-                         time_s=time.perf_counter() - t0)
-            return path, stats
+            cost = node.g
+            tail = []
+            if config.final_approach_m > 0:
+                # Join to the exact goal; if that is not possible from this
+                # node, just keep searching (this node is expanded as normal).
+                tail = connect_to_goal(path[-1], final_goal, vehicle, checker, config.sub_step)
+                cost += config.final_approach_m
+            if tail is not None:
+                stats.update(cost=cost, reached_goal=True, directions=directions + [1] * len(tail),
+                             time_s=time.perf_counter() - t0)
+                return path + tail, stats
 
         if stats["nodes_expanded"] >= config.max_expansions:
             break

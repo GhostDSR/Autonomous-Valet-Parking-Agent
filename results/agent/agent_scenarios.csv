@@ -1,0 +1,4 @@
+scenario,slot,phase,time_s,replans,min_gap_m,centre_error_cm,heading_error_deg
+normal,A2,DONE,61.22,0,0.20,5.31,0.21
+slot_taken,B0,DONE,63.46,1,0.21,5.21,0.19
+pedestrian,A2,DONE,86.59,2,0.23,5.44,0.17
