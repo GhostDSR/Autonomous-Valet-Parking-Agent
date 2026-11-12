@@ -6,14 +6,25 @@ from controllers.valet_controller.m1_sensors import (
     classify_slots_from_scan,
     compass_yaw,
     lidar_points_world,
+    webots_ranges_to_ccw,
 )
 from planner.parking_lot import make_slots
 
 
 class M1SensorTests(unittest.TestCase):
     def test_compass_heading(self):
+        # ENU world, north = +Y. The compass reports north in the robot frame:
+        # facing east (yaw 0) north is on the left (+y); facing north
+        # (yaw +90 deg) north is straight ahead (+x).
         self.assertAlmostEqual(compass_yaw((0.0, 1.0, 0.0)), 0.0)
-        self.assertAlmostEqual(compass_yaw((-1.0, 0.0, 0.0)), math.pi / 2)
+        self.assertAlmostEqual(compass_yaw((1.0, 0.0, 0.0)), math.pi / 2)
+        self.assertAlmostEqual(compass_yaw((-1.0, 0.0, 0.0)), -math.pi / 2)
+        self.assertAlmostEqual(abs(compass_yaw((0.0, -1.0, 0.0))), math.pi)
+
+    def test_compass_round_trip(self):
+        for yaw in (-2.5, -1.0, 0.0, 0.7, 2.0, 3.0):
+            reading = (math.sin(yaw), math.cos(yaw), 0.0)
+            self.assertAlmostEqual(compass_yaw(reading), yaw)
 
     def test_lidar_world_transform(self):
         points = lidar_points_world([5.0, 5.0, 5.0], (1.0, 2.0, 0.0),
@@ -87,6 +98,19 @@ class M1SensorTests(unittest.TestCase):
     def test_missing_sector_is_none_not_large(self):
         clearances = body_clearances_from_scan([float("inf")] * 721, (0, 0, 0))
         self.assertEqual(set(clearances.values()), {None})
+
+    def test_webots_range_image_is_reordered_counter_clockwise(self):
+        # Webots sample 0 is the sensor's left (+FOV/2); the last is its right.
+        raw = [1.0, 2.0, 3.0]
+        self.assertEqual(webots_ranges_to_ccw(raw), [3.0, 2.0, 1.0])
+        # A return on the vehicle's left (+y) is raw sample 0 of a 180-degree
+        # image; after reordering it must project onto +y in the world.
+        raw = [4.0, float("inf"), float("inf")]
+        points = lidar_points_world(webots_ranges_to_ccw(raw), (0.0, 0.0, 0.0),
+                                    field_of_view=math.pi, max_range=10.0)
+        self.assertEqual(len(points), 1)
+        self.assertAlmostEqual(points[0][0], 0.0, places=6)
+        self.assertAlmostEqual(points[0][1], 4.0)
 
     def test_slot_classification_keeps_occluded_bays_unknown(self):
         slots = {"A0": make_slots()["A0"]}

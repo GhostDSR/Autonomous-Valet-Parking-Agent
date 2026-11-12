@@ -197,9 +197,13 @@ def body_clearances_from_scan(
 
 
 def compass_yaw(compass_values: Sequence[float]) -> float:
-    """Convert Webots compass north vector to ENU heading (CCW from world +X).
+    """Convert a Webots compass reading to ENU heading (CCW from world +X).
 
-    This assumes world +Y is north and the robot's local +X is forward.
+    Webots returns the world "north" direction expressed in the compass's own
+    frame (x forward, y left, z up). In an ENU world north is world +Y, so for
+    a robot with heading psi the reading is (sin psi, cos psi) and
+    psi = atan2(north_x, north_y). The compass must be mounted un-rotated on
+    the Robot, as in worlds/parking_lot.wbt.
     """
     if len(compass_values) < 2:
         raise ValueError("compass must provide at least two components")
@@ -208,4 +212,15 @@ def compass_yaw(compass_values: Sequence[float]) -> float:
         raise ValueError("invalid compass vector")
     if math.hypot(north_x, north_y) < 1e-9:
         raise ValueError("zero compass vector")
-    return math.atan2(-north_x, north_y)
+    return math.atan2(north_x, north_y)
+
+
+def webots_ranges_to_ccw(ranges: Sequence[float]) -> List[float]:
+    """Reorder a raw Webots Lidar range image to counter-clockwise order.
+
+    Webots returns the horizontal samples from the sensor's left to its right
+    (clockwise: sample 0 is at +FOV/2, the last sample at -FOV/2). Every
+    function in this module expects counter-clockwise order from -FOV/2 to
+    +FOV/2, so the controller must pass the raw image through this first.
+    """
+    return list(reversed(list(ranges)))
