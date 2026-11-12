@@ -76,8 +76,8 @@ Still open:
 
 | Owner | Issue | Suggested fix |
 |---|---|---|
-| **M1 (Devansh)** | `worlds/parking_lot.wbt` still has rows A and D against the outer wall. | Move rows A and D (bay lines and parked cars) 0.5 m away from the wall: row A centre y 2.5 → 3.0, row D centre y 31.5 → 31.0. This matches `planner/parking_lot.py`. |
-| **M1** | `classify_slots_from_scan` pads each bay by 0.2 m. For bays backed by a wall, rays that hit the wall land inside the padded box, so free A/D bays read as occupied. | Use less padding along the bay depth, or ignore returns beyond the bay's back line. |
+| **M1 (Devansh)** | ~~`worlds/parking_lot.wbt` still has rows A and D against the outer wall.~~ **Fixed:** rows A and D are 0.5 m off the wall (row A centre y 3.0, row D centre y 31.0), matching `planner/parking_lot.py`. | Guarded by `tests/test_m1_world.py`. |
+| **M1** | ~~`classify_slots_from_scan` marks free wall-side bays occupied.~~ **Fixed:** returns beyond a bay's back line are ignored. | Guarded by `tests/test_m1_sensors.py` and `tests/test_m1_world_scan.py`. |
 | **M1** | `body_clearances_from_scan` only covers ±25° around each axis, so obstacles off the corners are missed. A side with no return gives `None`, which M3 treats as a fault. | Assign each point to its nearest side, and report "no return" as clear to max range (see `body_clearances` in `agent/valet_agent.py`). |
 | **M3 / M4** | Six bays at the ends of the aisles still fail in the sweep. | See Results. |
 
