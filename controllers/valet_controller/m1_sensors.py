@@ -8,7 +8,13 @@ from __future__ import annotations
 import math
 from typing import Dict, Iterable, List, Sequence, Tuple
 
-from planner.parking_lot import make_slots, PARKED_CAR_LENGTH, PARKED_CAR_WIDTH
+from planner.parking_lot import (
+    BAY_DEPTH,
+    BAY_WIDTH,
+    PARKED_CAR_LENGTH,
+    PARKED_CAR_WIDTH,
+    make_slots,
+)
 
 Point = Tuple[float, float]
 Pose2D = Tuple[float, float, float]
@@ -76,6 +82,16 @@ def _ray_rectangle_interval(
     return max(0.0, t_min), t_max
 
 
+def _hit_inside_bay(point: Point, slot) -> bool:
+    """True if a lidar return lies inside the bay's own BAY_WIDTH x BAY_DEPTH area."""
+    dx, dy = point[0] - slot.x, point[1] - slot.y
+    c, s = math.cos(slot.yaw), math.sin(slot.yaw)
+    along = c * dx + s * dy          # towards the car's nose (depth direction)
+    across = -s * dx + c * dy        # across the bay
+    eps = 1e-9
+    return abs(along) <= BAY_DEPTH / 2.0 + eps and abs(across) <= BAY_WIDTH / 2.0 + eps
+
+
 def classify_slots_from_scan(
     ranges: Sequence[float],
     pose: Pose2D,
@@ -91,6 +107,13 @@ def classify_slots_from_scan(
     along that ray. A return within the padded parked-car footprint indicates
     occupancy. Bays hidden behind another object remain unknown rather than
     being incorrectly advertised as free.
+
+    Only returns that land inside the bay itself count as occupancy. The
+    ``visibility_margin`` lets a return up to 0.2 m past the padded footprint
+    still count, which for a bay backed by a wall (or the island kerb line)
+    would let the wall, or a car behind it, mark a free bay occupied. A parked
+    car never extends past the bay's back line, so anything returned from
+    beyond it is ignored.
     """
     slots = make_slots() if slots is None else slots
     x, y, yaw = pose
@@ -123,7 +146,8 @@ def classify_slots_from_scan(
             entry, exit_distance = interval
             if distance >= entry - visibility_margin:
                 visible[slot_id] = True
-            if entry - visibility_margin <= distance <= exit_distance + visibility_margin:
+            if (entry - visibility_margin <= distance <= exit_distance + visibility_margin
+                    and _hit_inside_bay((x + distance * direction[0], y + distance * direction[1]), slot)):
                 occupied[slot_id] = True
 
     for slot_id in slots:
