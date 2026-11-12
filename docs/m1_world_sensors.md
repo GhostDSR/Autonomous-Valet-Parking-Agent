@@ -9,7 +9,7 @@
 
 M1 provides the simulation world, a drivable four-wheel Ackermann vehicle model (steering joints, wheels and motors), the sensors, the common pose frame, and LiDAR-based bay classification. M1 does not issue driving commands: M4 remains the only module that controls vehicle motion. The one exception is the throw-away bring-up check \`controllers/m1_actuator_check/\`, which is never part of a pipeline run.
 
-The world follows the geometry already used by M2 in \`planner/parking_lot.py\`: 40 m × 34 m lot, entrance gap at the left wall between y=6 m and y=11 m, 40 bays (A0–D9), 2.5 m × 5 m bay dimensions, and the centre kerb at y=17 m. The initial car rear-axle pose is (2.0, 8.5, 0.0).
+The world follows the geometry already used by M2 in \`planner/parking_lot.py\`: 40 m × 34 m lot, entrance gap at the left wall between y=6 m and y=11 m, 40 bays (A0–D9), 2.5 m × 5 m bay dimensions, and the centre kerb at y=17 m. Rows A and D stand 0.5 m off the outer walls (row A centre y = 3.0 m, row D centre y = 31.0 m), and parked cars lie along their bays (1.9 m across, 4.5 m deep). `tests/test_m1_world.py` checks the world file against `planner/parking_lot.py`. The initial car rear-axle pose is (2.0, 8.5, 0.0).
 
 ## Coordinate frame and vehicle geometry
 
@@ -39,7 +39,7 @@ These dimensions intentionally match M2's current \`VehicleParams\` placeholders
 
 ## Occupancy logic
 
-\`m1_sensors.py\` converts the planar range image into world-coordinate rays. Each ray is intersected with the oriented footprint of every bay. A return inside the padded parked-car footprint marks the bay occupied. A ray that traverses a bay and returns beyond it provides evidence that the bay is free. A bay with no line-of-sight evidence remains **unknown**; it is not silently treated as free.
+\`m1_sensors.py\` converts the planar range image into world-coordinate rays. Each ray is intersected with the oriented footprint of every bay. A return inside the padded parked-car footprint marks the bay occupied, but only if it lands inside the bay itself: a return from beyond the bay's back line (a wall, or a car behind the island kerb) is ignored. A ray that traverses a bay and returns beyond it provides evidence that the bay is free. A bay with no line-of-sight evidence remains **unknown**; it is not silently treated as free.
 
 The controller emits one JSON record per second prefixed with \`M1_SENSOR\`. It includes rear-axle pose, four estimated body clearances, per-slot states, counts, LiDAR point count, and raw distance-sensor values.
 
@@ -76,4 +76,4 @@ This is a sensor bring-up controller, not the complete autonomous valet behaviou
 - The current clearance estimate uses the M2/M3 rectangular vehicle footprint. Validate it against corners and sensor mounting positions before closed-loop parking.
 - Tyre friction, motor torque and suspension are not calibrated. The wheels are rigid with default Webots contact properties; if the car jitters at the 32 ms basic time step, reduce \`basicTimeStep\` to 16.
 - The distance sensors are enabled and logged as raw values. Their lookup-table conversion and sensor-specific calibration must be completed before using them as safety-critical clearances.
-- The static world checks in \`tests/test_m1_world.py\` do not run Webots. The world file, lidar orientation and ordering, compass sign and the actuator signs above have not yet been run in Webots; verify them with the steps above. Run the world in the installed Webots version and verify sensor names, scan orientation, collision geometry and the actual measured pose.
+- The static world checks in \`tests/test_m1_world.py\` do not run Webots. The world has been run once in Webots R2023b (headless, software rendering): `m1_actuator_check` passed 5/5 and the lidar slot classification matched the world with no wrong occupied/free calls (see `docs/report/section_world_sensors.md`). Repeat this on your own Webots version and GPU before relying on the numbers, and check collision geometry and pose there.

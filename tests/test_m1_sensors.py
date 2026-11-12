@@ -131,6 +131,30 @@ class M1SensorTests(unittest.TestCase):
         )
         self.assertEqual(result["A0"], "free")
 
+    def test_return_behind_the_bay_back_line_does_not_mark_it_occupied(self):
+        # A free wall-side bay: the only return is a wall 5 cm behind the bay's
+        # back line. That is 10 cm past the padded footprint, which the 0.2 m
+        # ray margin used to accept as "inside" the car.
+        slot = make_slots()["A0"]
+        back_line = slot.y - 2.5
+        wall_y = back_line - 0.05
+        origin = (slot.x, 8.5, 0.0)
+        ranges = [float("inf")] * 721
+        ranges[180] = origin[1] - wall_y          # ray 180 points straight down (-y)
+        result = classify_slots_from_scan(ranges, origin, slots={"A0": slot},
+                                          field_of_view=2 * math.pi, max_range=40.0)
+        self.assertEqual(result["A0"], "free")
+
+    def test_return_on_the_parked_car_still_marks_the_bay_occupied(self):
+        slot = make_slots()["A0"]
+        nose_y = slot.y + 2.25                    # front face of a centred 4.5 m car
+        origin = (slot.x, 8.5, 0.0)
+        ranges = [float("inf")] * 721
+        ranges[180] = origin[1] - nose_y
+        result = classify_slots_from_scan(ranges, origin, slots={"A0": slot},
+                                          field_of_view=2 * math.pi, max_range=40.0)
+        self.assertEqual(result["A0"], "occupied")
+
 
 if __name__ == "__main__":
     unittest.main()

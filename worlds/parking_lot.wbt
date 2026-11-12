@@ -1,4 +1,7 @@
 #VRML_SIM R2023b utf8
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/Floor.proto"
 WorldInfo { basicTimeStep 32 coordinateSystem "ENU" }
 Viewpoint { orientation -0.31002278 0.2996916 0.90225873 1.7071179 position 22 -42 46 }
 TexturedBackground { }
@@ -78,7 +81,7 @@ Solid {
 }
 
 Solid {
-  translation 8 2.5 0.012
+  translation 8 3 0.012
   name "line_A_0"
   children [
     Shape {
@@ -90,7 +93,7 @@ Solid {
 }
 
 Solid {
-  translation 10.5 2.5 0.012
+  translation 10.5 3 0.012
   name "line_A_1"
   children [
     Shape {
@@ -102,7 +105,7 @@ Solid {
 }
 
 Solid {
-  translation 13 2.5 0.012
+  translation 13 3 0.012
   name "line_A_2"
   children [
     Shape {
@@ -114,7 +117,7 @@ Solid {
 }
 
 Solid {
-  translation 15.5 2.5 0.012
+  translation 15.5 3 0.012
   name "line_A_3"
   children [
     Shape {
@@ -126,7 +129,7 @@ Solid {
 }
 
 Solid {
-  translation 18 2.5 0.012
+  translation 18 3 0.012
   name "line_A_4"
   children [
     Shape {
@@ -138,7 +141,7 @@ Solid {
 }
 
 Solid {
-  translation 20.5 2.5 0.012
+  translation 20.5 3 0.012
   name "line_A_5"
   children [
     Shape {
@@ -150,7 +153,7 @@ Solid {
 }
 
 Solid {
-  translation 23 2.5 0.012
+  translation 23 3 0.012
   name "line_A_6"
   children [
     Shape {
@@ -162,7 +165,7 @@ Solid {
 }
 
 Solid {
-  translation 25.5 2.5 0.012
+  translation 25.5 3 0.012
   name "line_A_7"
   children [
     Shape {
@@ -174,7 +177,7 @@ Solid {
 }
 
 Solid {
-  translation 28 2.5 0.012
+  translation 28 3 0.012
   name "line_A_8"
   children [
     Shape {
@@ -186,7 +189,7 @@ Solid {
 }
 
 Solid {
-  translation 30.5 2.5 0.012
+  translation 30.5 3 0.012
   name "line_A_9"
   children [
     Shape {
@@ -198,7 +201,7 @@ Solid {
 }
 
 Solid {
-  translation 33 2.5 0.012
+  translation 33 3 0.012
   name "line_A_10"
   children [
     Shape {
@@ -210,7 +213,7 @@ Solid {
 }
 
 Solid {
-  translation 20.5 0 0.012
+  translation 20.5 0.5 0.012
   name "row_A_backline"
   children [
     Shape {
@@ -510,7 +513,7 @@ Solid {
 }
 
 Solid {
-  translation 8 31.5 0.012
+  translation 8 31 0.012
   name "line_D_0"
   children [
     Shape {
@@ -522,7 +525,7 @@ Solid {
 }
 
 Solid {
-  translation 10.5 31.5 0.012
+  translation 10.5 31 0.012
   name "line_D_1"
   children [
     Shape {
@@ -534,7 +537,7 @@ Solid {
 }
 
 Solid {
-  translation 13 31.5 0.012
+  translation 13 31 0.012
   name "line_D_2"
   children [
     Shape {
@@ -546,7 +549,7 @@ Solid {
 }
 
 Solid {
-  translation 15.5 31.5 0.012
+  translation 15.5 31 0.012
   name "line_D_3"
   children [
     Shape {
@@ -558,7 +561,7 @@ Solid {
 }
 
 Solid {
-  translation 18 31.5 0.012
+  translation 18 31 0.012
   name "line_D_4"
   children [
     Shape {
@@ -570,7 +573,7 @@ Solid {
 }
 
 Solid {
-  translation 20.5 31.5 0.012
+  translation 20.5 31 0.012
   name "line_D_5"
   children [
     Shape {
@@ -582,7 +585,7 @@ Solid {
 }
 
 Solid {
-  translation 23 31.5 0.012
+  translation 23 31 0.012
   name "line_D_6"
   children [
     Shape {
@@ -594,7 +597,7 @@ Solid {
 }
 
 Solid {
-  translation 25.5 31.5 0.012
+  translation 25.5 31 0.012
   name "line_D_7"
   children [
     Shape {
@@ -606,7 +609,7 @@ Solid {
 }
 
 Solid {
-  translation 28 31.5 0.012
+  translation 28 31 0.012
   name "line_D_8"
   children [
     Shape {
@@ -618,7 +621,7 @@ Solid {
 }
 
 Solid {
-  translation 30.5 31.5 0.012
+  translation 30.5 31 0.012
   name "line_D_9"
   children [
     Shape {
@@ -630,7 +633,7 @@ Solid {
 }
 
 Solid {
-  translation 33 31.5 0.012
+  translation 33 31 0.012
   name "line_D_10"
   children [
     Shape {
@@ -642,7 +645,7 @@ Solid {
 }
 
 Solid {
-  translation 20.5 29 0.012
+  translation 20.5 28.5 0.012
   name "row_D_backline"
   children [
     Shape {
@@ -654,7 +657,8 @@ Solid {
 }
 
 Solid {
-  translation 9.25 2.5 0.65
+  translation 9.25 3 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_A0"
   children [
     Shape {
@@ -666,7 +670,8 @@ Solid {
 }
 
 Solid {
-  translation 11.75 2.5 0.65
+  translation 11.75 3 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_A1"
   children [
     Shape {
@@ -678,7 +683,8 @@ Solid {
 }
 
 Solid {
-  translation 16.75 2.5 0.65
+  translation 16.75 3 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_A3"
   children [
     Shape {
@@ -690,7 +696,8 @@ Solid {
 }
 
 Solid {
-  translation 19.25 2.5 0.65
+  translation 19.25 3 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_A4"
   children [
     Shape {
@@ -702,7 +709,8 @@ Solid {
 }
 
 Solid {
-  translation 24.25 2.5 0.65
+  translation 24.25 3 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_A6"
   children [
     Shape {
@@ -714,7 +722,8 @@ Solid {
 }
 
 Solid {
-  translation 29.25 2.5 0.65
+  translation 29.25 3 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_A8"
   children [
     Shape {
@@ -727,6 +736,7 @@ Solid {
 
 Solid {
   translation 11.75 14.5 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_B1"
   children [
     Shape {
@@ -739,6 +749,7 @@ Solid {
 
 Solid {
   translation 14.25 14.5 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_B2"
   children [
     Shape {
@@ -751,6 +762,7 @@ Solid {
 
 Solid {
   translation 21.75 14.5 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_B5"
   children [
     Shape {
@@ -763,6 +775,7 @@ Solid {
 
 Solid {
   translation 26.75 14.5 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_B7"
   children [
     Shape {
@@ -775,6 +788,7 @@ Solid {
 
 Solid {
   translation 31.75 14.5 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_B9"
   children [
     Shape {
@@ -787,6 +801,7 @@ Solid {
 
 Solid {
   translation 9.25 19.5 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_C0"
   children [
     Shape {
@@ -799,6 +814,7 @@ Solid {
 
 Solid {
   translation 14.25 19.5 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_C2"
   children [
     Shape {
@@ -811,6 +827,7 @@ Solid {
 
 Solid {
   translation 16.75 19.5 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_C3"
   children [
     Shape {
@@ -823,6 +840,7 @@ Solid {
 
 Solid {
   translation 24.25 19.5 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_C6"
   children [
     Shape {
@@ -835,6 +853,7 @@ Solid {
 
 Solid {
   translation 29.25 19.5 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_C8"
   children [
     Shape {
@@ -846,7 +865,8 @@ Solid {
 }
 
 Solid {
-  translation 11.75 31.5 0.65
+  translation 11.75 31 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_D1"
   children [
     Shape {
@@ -858,7 +878,8 @@ Solid {
 }
 
 Solid {
-  translation 14.25 31.5 0.65
+  translation 14.25 31 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_D2"
   children [
     Shape {
@@ -870,7 +891,8 @@ Solid {
 }
 
 Solid {
-  translation 19.25 31.5 0.65
+  translation 19.25 31 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_D4"
   children [
     Shape {
@@ -882,7 +904,8 @@ Solid {
 }
 
 Solid {
-  translation 21.75 31.5 0.65
+  translation 21.75 31 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_D5"
   children [
     Shape {
@@ -894,7 +917,8 @@ Solid {
 }
 
 Solid {
-  translation 26.75 31.5 0.65
+  translation 26.75 31 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_D7"
   children [
     Shape {
@@ -906,7 +930,8 @@ Solid {
 }
 
 Solid {
-  translation 31.75 31.5 0.65
+  translation 31.75 31 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_D9"
   children [
     Shape {

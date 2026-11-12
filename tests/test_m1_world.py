@@ -9,6 +9,11 @@ import os
 import re
 import unittest
 
+from planner.parking_lot import (
+    BAY_DEPTH, BAY_WIDTH, DEFAULT_OCCUPIED, PARKED_CAR_LENGTH, PARKED_CAR_WIDTH,
+    ROWS, WALL_THICKNESS, make_slots,
+)
+
 WORLD = os.path.join(os.path.dirname(__file__), "..", "worlds", "parking_lot.wbt")
 
 ACTUATORS = (
@@ -53,6 +58,13 @@ class WorldFileTests(unittest.TestCase):
     def test_braces_and_brackets_balance(self):
         self.assertEqual(self.world.count("{"), self.world.count("}"))
         self.assertEqual(self.world.count("["), self.world.count("]"))
+
+    def test_every_proto_node_is_declared_with_externproto(self):
+        # Without EXTERNPROTO, Webots R2023b+ skips the node ("Skipped unknown
+        # 'Floor' node"), the lot has no ground and the car falls through it.
+        for proto in ("Floor", "TexturedBackground", "TexturedBackgroundLight"):
+            self.assertRegex(self.world, r"(?m)^%s \{" % proto)
+            self.assertRegex(self.world, r'(?m)^EXTERNPROTO "[^"\n]*/%s\.proto"$' % proto)
 
     def test_device_names_are_unique_and_present(self):
         names = re.findall(r'name "([^"]+)"', self.world)
@@ -116,6 +128,68 @@ class WorldFileTests(unittest.TestCase):
     def test_lidar_plane_hits_walls_and_parked_cars(self):
         z_world = 0.3 + float(re.search(r"Lidar \{.*?translation 0 0 ([\d.]+)", self.robot, re.S).group(1))
         self.assertLess(z_world, 1.0)   # walls are 1.0 m tall, parked cars 1.3 m
+
+
+def _solids():
+    """{name: (x, y, yaw, size_x, size_y)} for every Solid with a Box bounding object."""
+    out = {}
+    pattern = re.compile(
+        r'Solid \{\n  translation (\S+) (\S+) \S+\n(?:  rotation 0 0 1 (\S+)\n)?'
+        r'  name "([^"]+)".*?boundingObject Box \{ size (\S+) (\S+) \S+ \}', re.S)
+    for x, y, rot, name, sx, sy in pattern.findall(_read()):
+        out[name] = (float(x), float(y), float(rot or 0.0), float(sx), float(sy))
+    return out
+
+
+class WorldMatchesPlannerTests(unittest.TestCase):
+    """The world and planner/parking_lot.py must describe the same lot."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.solids = _solids()
+        cls.slots = make_slots()
+
+    def test_bay_lines_sit_on_the_planner_rows(self):
+        for name, y_bottom, _yaw, _aisle in ROWS:
+            for i in range(11):                      # 10 bays -> 11 dividing lines
+                x, y, _, _, length = self.solids["line_%s_%d" % (name, i)]
+                self.assertAlmostEqual(x, 8.0 + i * BAY_WIDTH)
+                self.assertAlmostEqual(y, y_bottom + BAY_DEPTH / 2, msg="line_%s_%d" % (name, i))
+                self.assertAlmostEqual(length, BAY_DEPTH)
+
+    def test_row_lines_sit_on_the_planner_row_edges(self):
+        for name, y_bottom, _yaw, _aisle in ROWS:
+            self.assertAlmostEqual(self.solids["row_%s_backline" % name][1], y_bottom)
+
+    def test_parked_cars_are_exactly_the_planner_occupied_bays(self):
+        cars = {n[len("parked_car_"):] for n in self.solids if n.startswith("parked_car_")}
+        self.assertEqual(cars, set(DEFAULT_OCCUPIED))
+
+    def test_parked_cars_are_centred_in_their_bays(self):
+        for sid in DEFAULT_OCCUPIED:
+            x, y, _, _, _ = self.solids["parked_car_" + sid]
+            self.assertAlmostEqual(x, self.slots[sid].x, msg=sid)
+            self.assertAlmostEqual(y, self.slots[sid].y, msg=sid)
+
+    def test_parked_cars_lie_along_their_bays(self):
+        # A car is PARKED_CAR_LENGTH long in the direction of its bay's depth (world y)
+        # and PARKED_CAR_WIDTH across it; unrotated boxes would be 4.5 m wide in a 2.5 m bay.
+        for sid in DEFAULT_OCCUPIED:
+            _, _, yaw, sx, sy = self.solids["parked_car_" + sid]
+            across_x = abs(sx * math.cos(yaw)) + abs(sy * math.sin(yaw))
+            along_y = abs(sx * math.sin(yaw)) + abs(sy * math.cos(yaw))
+            self.assertAlmostEqual(across_x, PARKED_CAR_WIDTH, places=3, msg=sid)
+            self.assertAlmostEqual(along_y, PARKED_CAR_LENGTH, places=3, msg=sid)
+
+    def test_rows_a_and_d_stand_clear_of_the_outer_wall(self):
+        # Rear of a parked car, and the row's back line, must be off the wall's inner face.
+        for sid in ("A0", "D0"):
+            slot = self.slots[sid]
+            wall_face = WALL_THICKNESS if sid[0] == "A" else 34.0 - WALL_THICKNESS
+            sign = -1.0 if sid[0] == "A" else 1.0
+            car_rear = slot.y + sign * PARKED_CAR_LENGTH / 2
+            self.assertGreaterEqual(abs(car_rear - wall_face), 0.4)
+        self.assertAlmostEqual(self.solids["row_A_backline"][1], 0.5)
 
 
 if __name__ == "__main__":
