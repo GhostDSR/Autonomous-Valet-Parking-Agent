@@ -27,13 +27,66 @@ class M1SensorTests(unittest.TestCase):
                                     field_of_view=math.pi, max_range=20.0)
         self.assertEqual(points, [])
 
+    @staticmethod
+    def _room_scan(n=721, front=10.0, rear=10.0, left=10.0, right=10.0):
+        """Range image (CCW, -pi..pi) of a rectangular room around the axle."""
+        ranges = []
+        for i in range(n):
+            a = -math.pi + i * 2 * math.pi / (n - 1)
+            c, s_ = math.cos(a), math.sin(a)
+            hits = []
+            if c > 1e-9:
+                hits.append(front / c)
+            if c < -1e-9:
+                hits.append(-rear / c)
+            if s_ > 1e-9:
+                hits.append(left / s_)
+            if s_ < -1e-9:
+                hits.append(-right / s_)
+            ranges.append(min(hits))
+        return ranges
+
     def test_body_clearance_subtracts_vehicle_footprint(self):
-        ranges = [10.0] * 721
-        clearances = body_clearances_from_scan(ranges, (0, 0, 0))
+        # Flat walls 10 m from the rear axle on every side. Footprint:
+        # 3.6 m ahead of the axle, 1.0 m behind it, 0.95 m to each side.
+        clearances = body_clearances_from_scan(self._room_scan(), (0, 0, 0))
         self.assertAlmostEqual(clearances["front"], 10.0 - 3.6)
         self.assertAlmostEqual(clearances["rear"], 10.0 - 1.0)
-        self.assertAlmostEqual(clearances["left"], 10.0 - 0.95, places=1)
-        self.assertAlmostEqual(clearances["right"], 10.0 - 0.95, places=1)
+        self.assertAlmostEqual(clearances["left"], 10.0 - 0.95)
+        self.assertAlmostEqual(clearances["right"], 10.0 - 0.95)
+
+    def test_body_clearance_tracks_each_side_independently(self):
+        clearances = body_clearances_from_scan(
+            self._room_scan(front=5.0, rear=4.0, left=3.0, right=6.0), (0, 0, 0))
+        self.assertAlmostEqual(clearances["front"], 5.0 - 3.6)
+        self.assertAlmostEqual(clearances["rear"], 4.0 - 1.0)
+        self.assertAlmostEqual(clearances["left"], 3.0 - 0.95)
+        self.assertAlmostEqual(clearances["right"], 6.0 - 0.95)
+
+    def test_oblique_return_uses_distance_to_footprint(self):
+        # One return at 20 deg left of straight ahead, 10 m away: the point is
+        # (9.397, 3.420). It is 5.797 m beyond the bumper and 2.470 m outside
+        # the side of the footprint.
+        ranges = [float("inf")] * 721
+        ranges[360 + 40] = 10.0  # 721 samples over 2*pi -> 0.5 deg each
+        clearances = body_clearances_from_scan(ranges, (0, 0, 0))
+        expected = math.hypot(10.0 * math.cos(math.radians(20)) - 3.6,
+                              10.0 * math.sin(math.radians(20)) - 0.95)
+        self.assertAlmostEqual(clearances["front"], expected)
+        self.assertIsNone(clearances["rear"])
+        self.assertIsNone(clearances["left"])
+        self.assertIsNone(clearances["right"])
+
+    def test_side_obstacle_beside_the_body_is_close(self):
+        # An object 2 m to the left of the axle is 1.05 m from the body side.
+        ranges = [float("inf")] * 721
+        ranges[540] = 2.0
+        self.assertAlmostEqual(
+            body_clearances_from_scan(ranges, (0, 0, 0))["left"], 2.0 - 0.95)
+
+    def test_missing_sector_is_none_not_large(self):
+        clearances = body_clearances_from_scan([float("inf")] * 721, (0, 0, 0))
+        self.assertEqual(set(clearances.values()), {None})
 
     def test_slot_classification_keeps_occluded_bays_unknown(self):
         slots = {"A0": make_slots()["A0"]}
