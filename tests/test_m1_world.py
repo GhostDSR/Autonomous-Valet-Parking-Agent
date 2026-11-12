@@ -59,6 +59,13 @@ class WorldFileTests(unittest.TestCase):
         self.assertEqual(self.world.count("{"), self.world.count("}"))
         self.assertEqual(self.world.count("["), self.world.count("]"))
 
+    def test_every_proto_node_is_declared_with_externproto(self):
+        # Without EXTERNPROTO, Webots R2023b+ skips the node ("Skipped unknown
+        # 'Floor' node"), the lot has no ground and the car falls through it.
+        for proto in ("Floor", "TexturedBackground", "TexturedBackgroundLight"):
+            self.assertRegex(self.world, r"(?m)^%s \{" % proto)
+            self.assertRegex(self.world, r'(?m)^EXTERNPROTO "[^"\n]*/%s\.proto"$' % proto)
+
     def test_device_names_are_unique_and_present(self):
         names = re.findall(r'name "([^"]+)"', self.world)
         self.assertEqual(len(names), len(set(names)))
