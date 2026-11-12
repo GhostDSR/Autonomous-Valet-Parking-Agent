@@ -655,6 +655,7 @@ Solid {
 
 Solid {
   translation 9.25 3 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_A0"
   children [
     Shape {
@@ -667,6 +668,7 @@ Solid {
 
 Solid {
   translation 11.75 3 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_A1"
   children [
     Shape {
@@ -679,6 +681,7 @@ Solid {
 
 Solid {
   translation 16.75 3 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_A3"
   children [
     Shape {
@@ -691,6 +694,7 @@ Solid {
 
 Solid {
   translation 19.25 3 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_A4"
   children [
     Shape {
@@ -703,6 +707,7 @@ Solid {
 
 Solid {
   translation 24.25 3 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_A6"
   children [
     Shape {
@@ -715,6 +720,7 @@ Solid {
 
 Solid {
   translation 29.25 3 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_A8"
   children [
     Shape {
@@ -727,6 +733,7 @@ Solid {
 
 Solid {
   translation 11.75 14.5 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_B1"
   children [
     Shape {
@@ -739,6 +746,7 @@ Solid {
 
 Solid {
   translation 14.25 14.5 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_B2"
   children [
     Shape {
@@ -751,6 +759,7 @@ Solid {
 
 Solid {
   translation 21.75 14.5 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_B5"
   children [
     Shape {
@@ -763,6 +772,7 @@ Solid {
 
 Solid {
   translation 26.75 14.5 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_B7"
   children [
     Shape {
@@ -775,6 +785,7 @@ Solid {
 
 Solid {
   translation 31.75 14.5 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_B9"
   children [
     Shape {
@@ -787,6 +798,7 @@ Solid {
 
 Solid {
   translation 9.25 19.5 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_C0"
   children [
     Shape {
@@ -799,6 +811,7 @@ Solid {
 
 Solid {
   translation 14.25 19.5 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_C2"
   children [
     Shape {
@@ -811,6 +824,7 @@ Solid {
 
 Solid {
   translation 16.75 19.5 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_C3"
   children [
     Shape {
@@ -823,6 +837,7 @@ Solid {
 
 Solid {
   translation 24.25 19.5 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_C6"
   children [
     Shape {
@@ -835,6 +850,7 @@ Solid {
 
 Solid {
   translation 29.25 19.5 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_C8"
   children [
     Shape {
@@ -847,6 +863,7 @@ Solid {
 
 Solid {
   translation 11.75 31 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_D1"
   children [
     Shape {
@@ -859,6 +876,7 @@ Solid {
 
 Solid {
   translation 14.25 31 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_D2"
   children [
     Shape {
@@ -871,6 +889,7 @@ Solid {
 
 Solid {
   translation 19.25 31 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_D4"
   children [
     Shape {
@@ -883,6 +902,7 @@ Solid {
 
 Solid {
   translation 21.75 31 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_D5"
   children [
     Shape {
@@ -895,6 +915,7 @@ Solid {
 
 Solid {
   translation 26.75 31 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_D7"
   children [
     Shape {
@@ -907,6 +928,7 @@ Solid {
 
 Solid {
   translation 31.75 31 0.65
+  rotation 0 0 1 1.5707963
   name "parked_car_D9"
   children [
     Shape {
