@@ -1,0 +1,50 @@
+name: All Tests
+
+# Runs every unit test in tests/ on each push and pull request, so a change
+# in one module cannot silently break another (the M3 workflow only runs
+# test_parking.py).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  planner:
+    name: M2 planner tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install requirements
+        run: pip install -r requirements.txt
+      # test_astar, test_grid_map, test_hybrid_astar, test_route_planner, ...
+      - name: Run planner tests
+        run: python -m unittest discover -s tests -p "test_[ahgr]*.py" -v
+
+  all:
+    name: All module tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install requirements
+        run: pip install -r requirements.txt
+      - name: Run every test
+        run: python -m unittest discover -s tests -v
