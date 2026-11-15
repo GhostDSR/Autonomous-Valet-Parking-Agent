@@ -2,7 +2,7 @@
 
 **Module owner:** Harshil Mittal  
 **Project:** Autonomous Valet Parking Agent  
-**Status:** Standalone Python behaviour implemented; 19 test methods passed locally. Webots integration and experiments remain to be completed with M1 and M4.
+**Status:** Integrated Webots parking and parameter comparisons measured on A2, B0 and A5. Selected defaults: 0.45 m/s parking speed and 0.55 m lookahead. The measured world includes the documented M1 lidar mounting fix. See [M3 Webots tuning](m3_webots_tuning.md) for experiments, validation and remaining limits.
 
 ## Purpose and module boundary
 

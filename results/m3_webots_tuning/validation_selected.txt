@@ -1,0 +1,5 @@
+Selected configuration: speed_mps=0.45, lookahead_m=0.55.
+Full validation uses main 549b161 plus lidar-height fix, its regression test, and M3 changes.
+python3 -B -m unittest discover -s tests
+Ran 115 tests in 12.202s
+OK

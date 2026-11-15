@@ -18,8 +18,8 @@ from .parking_types import ControlMode, ParkingCommand, ParkingState
 
 @dataclass(frozen=True)
 class ManoeuvreConfig:
-    speed_mps: float = 0.35
-    lookahead_m: float = 0.65
+    speed_mps: float = 0.45
+    lookahead_m: float = 0.55
     sample_step_m: float = 0.05
     position_tolerance_m: float = 0.06
     tracking_limit_m: float = 0.6
