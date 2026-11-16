@@ -949,7 +949,7 @@ Robot {
   translation 2 8.5 0.3
   rotation 0 0 1 0
   name "valet_car"
-  controller "valet_controller"
+  controller "valet_agent"
   children [
     # ---- chassis (4.6 m long: 1.0 m rear overhang + 2.8 m wheelbase + 0.8 m front overhang)
     # Split into three boxes so the steered front wheels have room to turn.

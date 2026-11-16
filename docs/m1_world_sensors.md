@@ -57,9 +57,9 @@ Each clearance is the smallest straight-line distance from a LiDAR hit point in 
 1. Install Webots R2023b or later and Python 3.8+.
 2. From the repository root, install dependencies: \`pip install -r requirements.txt\`.
 3. Open \`worlds/parking_lot.wbt\` in Webots.
-4. Confirm the robot controller is set to \`valet_controller\`.
+4. The robot controller is \`valet_agent\`, so the car parks itself when you press Run. To only read the sensors, set the car's \`controller\` field to \`valet_controller\`.
 5. Press **Run** and inspect the controller console for \`M1_SENSOR\` lines.
-6. Check the actuators once: set the car's \`controller\` field to \`m1_actuator_check\`, run, and read the \`M1_ACTUATOR_CHECK PASS/FAIL\` lines (forward is +x, positive steer turns left, reverse is -x, steering sensors follow the command). Set the controller back to \`valet_controller\` afterwards.
+6. Check the actuators once: set the car's \`controller\` field to \`m1_actuator_check\`, run, and read the \`M1_ACTUATOR_CHECK PASS/FAIL\` lines (forward is +x, positive steer turns left, reverse is -x, steering sensors follow the command). Set the controller back to \`valet_agent\` afterwards.
 7. Run the pure-Python tests from the repository root:
 
    \`\`\`bash
