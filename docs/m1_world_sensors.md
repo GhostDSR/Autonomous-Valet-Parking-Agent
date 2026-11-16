@@ -31,7 +31,7 @@ These dimensions intentionally match M2's current \`VehicleParams\` placeholders
 | \`gps\` | GPS | World position; mounted at the rear-axle reference |
 | \`compass\` | Compass | Heading; converted to CCW from +X |
 | \`imu\` | InertialUnit | Available for later yaw/rate fusion |
-| \`lidar\` | 360° planar LiDAR | Slot occupancy and directional body clearances; scan plane 0.58 m above the floor (hits walls and parked cars, not the kerb) |
+| \`lidar\` | 360° planar LiDAR | Slot occupancy and directional body clearances; scan plane 0.65 m above the floor (hits walls and parked cars, not the kerb) |
 | \`ds_front\`, \`ds_rear\`, \`ds_left\`, \`ds_right\` | DistanceSensor | Near-field cross-checks |
 | \`front_left_steer\`, \`front_right_steer\` | RotationalMotor | Independent front steering, position control, ±0.65 rad, positive = left |
 | \`front_left_wheel_motor\`, \`front_right_wheel_motor\`, \`rear_left_wheel_motor\`, \`rear_right_wheel_motor\` | RotationalMotor | Four wheel drives; \`setPosition(inf)\` then \`setVelocity(rad/s)\`, max 60 rad/s, 400 N·m |
