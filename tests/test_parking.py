@@ -179,7 +179,8 @@ class ParkingMotionTests(unittest.TestCase):
     """
 
     def simulate(self, heading=0.0, side=1, yaw_error=0.0, steering_rate=1.0,
-                 obstacle_at=None, bump_m=0.0, max_corrections=2):
+                 obstacle_at=None, bump_m=0.0, max_corrections=2,
+                 obstacle_phase=None):
         car = VehicleGeometry(2.8, 4.6, 1.9, 1.0, 0.5)
         yaw = heading + side * math.pi / 2
         slot = ParkingSlot("test", 15.0, 15.0, yaw, 2.5, 5.0)
@@ -193,6 +194,7 @@ class ParkingMotionTests(unittest.TestCase):
         speed = steering = 0.0
         history = []
         bumped = False
+        obstacle_triggered = False
         dt = 0.032
         for step in range(6000):
             t = step * dt
@@ -201,7 +203,24 @@ class ParkingMotionTests(unittest.TestCase):
                 pose = Pose(pose.x - bump_m * math.sin(yaw),
                             pose.y + bump_m * math.cos(yaw), pose.yaw)
                 bumped = True
-            rear = 0.1 if obstacle_at is not None and t >= obstacle_at else 10.0
+            # Trigger by observed manoeuvre progress rather than elapsed
+            # time, so faster valid settings still exercise all phases.
+            if obstacle_phase == "setup":
+                in_phase = rules.phase == "align" and speed > 0.1
+            elif obstacle_phase == "turn":
+                turned = abs((pose.yaw - heading + math.pi) % (2 * math.pi) - math.pi)
+                in_phase = (rules.phase == "reverse" and speed < -0.1
+                            and math.radians(20) < turned < math.radians(70))
+            elif obstacle_phase == "final_reverse":
+                remaining = (rules.path[-1][3] - rules.path[rules.index][3]) if rules.path else math.inf
+                heading_error = abs((pose.yaw - yaw + math.pi) % (2 * math.pi) - math.pi)
+                in_phase = (rules.phase == "reverse" and speed < -0.03
+                            and remaining < 0.8 and heading_error < math.radians(5))
+            else:
+                in_phase = False
+            obstacle_triggered = obstacle_triggered or in_phase
+            timed_obstacle = obstacle_at is not None and t >= obstacle_at
+            rear = 0.1 if timed_obstacle or obstacle_triggered else 10.0
             obs = ParkingObservation(t, pose, speed, 10.0, rear, 10.0, 10.0, True)
             command = fsm.update(obs, t)
             history.append((t, pose, speed, steering, command))
@@ -253,9 +272,9 @@ class ParkingMotionTests(unittest.TestCase):
                 self.assertEqual(command.state, ParkingState.DONE, command.reason)
 
     def test_obstacle_interrupts_setup_turn_and_final_reverse(self):
-        for t in (1.0, 15.0, 40.0):
-            with self.subTest(time=t):
-                command, _, _, _ = self.simulate(obstacle_at=t)
+        for phase in ("setup", "turn", "final_reverse"):
+            with self.subTest(phase=phase):
+                command, _, _, _ = self.simulate(obstacle_phase=phase)
                 self.assertEqual(command.state, ParkingState.EMERGENCY_STOP)
                 self.assertEqual(command.mode, ControlMode.STOP)
 

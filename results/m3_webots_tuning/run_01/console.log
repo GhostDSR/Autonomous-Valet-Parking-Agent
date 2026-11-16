@@ -1,0 +1,66 @@
+LOCAL_RECORDING <local run output>
+[valet    0.03s] route to A2: 63 poses, 1.70 s planning
+[valet    0.03s] DRIVE     pose=(2.00, 8.50, 0 deg) v=-0.00 | Looking for a free slot
+[valet    1.06s] DRIVE     pose=(2.53, 8.50, -0 deg) v=+1.00 | Looking for a free slot
+[valet    2.08s] DRIVE     pose=(3.55, 8.50, -0 deg) v=+1.00 | Looking for a free slot
+[valet    3.10s] DRIVE     pose=(4.57, 8.50, 0 deg) v=+1.00 | Looking for a free slot
+[valet    4.13s] DRIVE     pose=(5.59, 8.51, 1 deg) v=+1.00 | Looking for a free slot
+[valet    5.15s] DRIVE     pose=(6.61, 8.56, 4 deg) v=+1.00 | Looking for a free slot
+[valet    6.18s] DRIVE     pose=(7.63, 8.66, 7 deg) v=+1.00 | Looking for a free slot
+[valet    7.20s] DRIVE     pose=(8.64, 8.80, 9 deg) v=+1.00 | Looking for a free slot
+[valet    8.22s] DRIVE     pose=(9.65, 8.95, 8 deg) v=+1.00 | Looking for a free slot
+[valet    9.25s] DRIVE     pose=(10.66, 9.07, 7 deg) v=+1.00 | Looking for a free slot
+[valet   10.27s] DRIVE     pose=(11.68, 9.17, 5 deg) v=+1.00 | Looking for a free slot
+[valet   11.30s] DRIVE     pose=(12.70, 9.26, 4 deg) v=+1.00 | Looking for a free slot
+[valet   12.32s] DRIVE     pose=(13.72, 9.33, 3 deg) v=+1.00 | Looking for a free slot
+[valet   13.34s] DRIVE     pose=(14.74, 9.38, 3 deg) v=+1.00 | Looking for a free slot
+[valet   14.37s] DRIVE     pose=(15.76, 9.41, 2 deg) v=+1.00 | Looking for a free slot
+[valet   15.39s] DRIVE     pose=(16.78, 9.44, 1 deg) v=+0.96 | Looking for a free slot
+[valet   16.26s] ALIGN     pose=(17.20, 9.45, 1 deg) v=+0.00 | Looking for a free slot
+[valet   17.28s] ALIGN     pose=(17.43, 9.45, 1 deg) v=+0.35 | Looking for a free slot
+[valet   18.30s] ALIGN     pose=(17.78, 9.45, 0 deg) v=+0.35 | Looking for a free slot
+[valet   19.33s] ALIGN     pose=(18.14, 9.45, -0 deg) v=+0.35 | Looking for a free slot
+[valet   20.35s] ALIGN     pose=(18.49, 9.45, -0 deg) v=+0.35 | Looking for a free slot
+[valet   21.38s] ALIGN     pose=(18.85, 9.45, -0 deg) v=+0.35 | Looking for a free slot
+[valet   22.40s] ALIGN     pose=(19.21, 9.45, -0 deg) v=+0.35 | Looking for a free slot
+[valet   23.42s] ALIGN     pose=(19.56, 9.45, -0 deg) v=+0.35 | Looking for a free slot
+[valet   24.45s] ALIGN     pose=(19.92, 9.45, -0 deg) v=+0.35 | Looking for a free slot
+[valet   25.47s] ALIGN     pose=(20.21, 9.45, -0 deg) v=+0.20 | Looking for a free slot
+[valet   26.50s] ALIGN     pose=(20.33, 9.45, -0 deg) v=+0.08 | Looking for a free slot
+[valet   27.23s] PARK      pose=(20.38, 9.45, -0 deg) v=+0.01 | Looking for a free slot
+[valet   28.26s] PARK      pose=(20.16, 9.44, 2 deg) v=-0.35 | Looking for a free slot
+[valet   29.28s] PARK      pose=(19.80, 9.42, 6 deg) v=-0.35 | Looking for a free slot
+[valet   30.30s] PARK      pose=(19.45, 9.37, 10 deg) v=-0.35 | Looking for a free slot
+[valet   31.33s] PARK      pose=(19.10, 9.31, 13 deg) v=-0.35 | Looking for a free slot
+[valet   32.35s] PARK      pose=(18.75, 9.22, 16 deg) v=-0.35 | Looking for a free slot
+[valet   33.38s] PARK      pose=(18.41, 9.11, 19 deg) v=-0.35 | Looking for a free slot
+[valet   34.40s] PARK      pose=(18.08, 8.99, 23 deg) v=-0.35 | Looking for a free slot
+[valet   35.42s] PARK      pose=(17.76, 8.84, 26 deg) v=-0.35 | Looking for a free slot
+[valet   36.45s] PARK      pose=(17.44, 8.68, 29 deg) v=-0.35 | Looking for a free slot
+[valet   37.47s] PARK      pose=(17.14, 8.50, 33 deg) v=-0.35 | Looking for a free slot
+[valet   38.50s] PARK      pose=(16.84, 8.30, 36 deg) v=-0.35 | Looking for a free slot
+[valet   39.52s] PARK      pose=(16.56, 8.08, 39 deg) v=-0.35 | Looking for a free slot
+[valet   40.54s] PARK      pose=(16.29, 7.85, 42 deg) v=-0.35 | Looking for a free slot
+[valet   41.57s] PARK      pose=(16.03, 7.61, 46 deg) v=-0.35 | Looking for a free slot
+[valet   42.59s] PARK      pose=(15.79, 7.35, 49 deg) v=-0.35 | Looking for a free slot
+[valet   43.62s] PARK      pose=(15.56, 7.07, 52 deg) v=-0.35 | Looking for a free slot
+[valet   44.64s] PARK      pose=(15.35, 6.79, 55 deg) v=-0.35 | Looking for a free slot
+[valet   45.66s] PARK      pose=(15.16, 6.49, 59 deg) v=-0.35 | Looking for a free slot
+[valet   46.69s] PARK      pose=(14.98, 6.18, 62 deg) v=-0.35 | Looking for a free slot
+[valet   47.71s] PARK      pose=(14.82, 5.87, 65 deg) v=-0.34 | Looking for a free slot
+[valet   48.74s] PARK      pose=(14.69, 5.55, 69 deg) v=-0.27 | Looking for a free slot
+[valet   49.76s] PARK      pose=(14.59, 5.28, 71 deg) v=-0.35 | Looking for a free slot
+[valet   50.78s] PARK      pose=(14.48, 4.94, 74 deg) v=-0.35 | Looking for a free slot
+[valet   51.81s] PARK      pose=(14.40, 4.59, 78 deg) v=-0.35 | Looking for a free slot
+[valet   52.83s] PARK      pose=(14.33, 4.24, 81 deg) v=-0.35 | Looking for a free slot
+[valet   53.86s] PARK      pose=(14.28, 3.89, 84 deg) v=-0.35 | Looking for a free slot
+[valet   54.88s] PARK      pose=(14.25, 3.54, 87 deg) v=-0.35 | Looking for a free slot
+[valet   55.90s] PARK      pose=(14.24, 3.18, 89 deg) v=-0.35 | Looking for a free slot
+[valet   56.93s] PARK      pose=(14.24, 2.83, 91 deg) v=-0.35 | Looking for a free slot
+[valet   57.95s] PARK      pose=(14.24, 2.47, 91 deg) v=-0.35 | Looking for a free slot
+[valet   58.98s] PARK      pose=(14.24, 2.12, 91 deg) v=-0.35 | Looking for a free slot
+[valet   60.00s] PARK      pose=(14.24, 1.88, 91 deg) v=-0.15 | Looking for a free slot
+[valet   61.02s] PARK      pose=(14.24, 1.78, 91 deg) v=-0.08 | Looking for a free slot
+[valet   61.44s] DONE: Parking completed
+[valet   61.44s] DONE      pose=(14.24, 1.76, 91 deg) v=-0.01 | Parking completed
+[valet] finished: DONE - Parking completed

@@ -1,0 +1,61 @@
+{
+  "source_revision": "549b161d26c325540b89cd1c67c397c5f74c43c6",
+  "simulator": "Webots R2025b nightly 10/11/2026",
+  "config": {
+    "method": "hybrid_astar",
+    "lateral": "stanley_ff",
+    "cruise_speed": 1.0,
+    "reverse_speed": 0.5,
+    "planning_margin_m": 0.4,
+    "replan_period_s": 1.0,
+    "retry_period_s": 5.0,
+    "lidar_fov": 6.28318530718,
+    "lidar_max_range": 40.0,
+    "obstacle_radius_m": 10.0,
+    "static_tolerance_m": 0.4,
+    "slots_from_lidar": true
+  },
+  "vehicle": {
+    "wheelbase_m": 2.8,
+    "length_m": 4.6,
+    "width_m": 1.9,
+    "rear_overhang_m": 1.0,
+    "max_steer_rad": 0.5
+  },
+  "manoeuvre": {
+    "speed_mps": 0.45,
+    "lookahead_m": 0.5,
+    "sample_step_m": 0.05,
+    "position_tolerance_m": 0.06,
+    "tracking_limit_m": 0.6,
+    "steering_fraction": 0.85,
+    "minimum_setup_m": 0.8,
+    "minimum_straight_m": 0.5,
+    "correction_distance_m": 2.5,
+    "phase_timeout_s": 70.0,
+    "max_corrections": 2
+  },
+  "safety": {
+    "clearance_margin_m": 0.15,
+    "reaction_time_s": 0.2,
+    "braking_deceleration_mps2": 1.0,
+    "max_sensor_age_s": 0.2,
+    "stopped_speed_mps": 0.03,
+    "max_parking_speed_mps": 0.5,
+    "arrival_distance_m": 0.6,
+    "arrival_heading_rad": 0.20943951023931956,
+    "parked_heading_rad": 0.05235987755982989,
+    "parked_centre_tolerance_m": 0.15,
+    "bay_inset_m": 0.05,
+    "task_timeout_s": 180.0
+  },
+  "experiment": {
+    "case_id": "B0_TUNED",
+    "target_slot": "B0",
+    "manoeuvre": {
+      "lookahead_m": 0.5,
+      "speed_mps": 0.45
+    }
+  },
+  "contact_detection": "not instrumented; contact outcome unverified"
+}
