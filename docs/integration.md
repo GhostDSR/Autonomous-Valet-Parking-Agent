@@ -84,3 +84,7 @@ Still open:
 ## Results
 
 Tables and figures are in `results/agent/` (`agent_scenarios.md`, `agent_sweep.md`, `agent_*.png`).
+
+The results were regenerated after M3's tuned parking settings (#16): still 34 / 40 bays, the same six failures, closest gap 0.07 m, mean time to park 68.6 s (was 77.0 s).
+
+In Webots, the whole agent has parked in A2, B0 and A5 (M3's runs in `results/m3_webots_tuning/`). This needed the lidar raised from 0.28 m to 0.35 m (#17); lower, it detects the car's own wheels and no route can be planned.
