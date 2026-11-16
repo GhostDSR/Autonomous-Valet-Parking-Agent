@@ -24,7 +24,11 @@ _To be written by Devansh._
 
 ## Harshil Mittal (M3 – Parking Manoeuvres)
 
-_To be written by Harshil._
+- Implemented the M3 state machine, perpendicular reverse-parking manoeuvre, sensor and clearance checks, stopping-distance rules, actuator limits, bounded alignment corrections and parking-completion checks in the behaviours module.
+- Integrated the manoeuvre with the M1 pose and lidar data, M2 pre-parking route and M4 control-command interface.
+- Tuned the parking speed and lookahead using Webots comparisons and documented the measured A2, B0 and A5 trials in docs/m3_webots_tuning.md.
+- Ran the integrated agent on the latest-main snapshot in Webots with valet_agent; it selected A2 and reached DONE at 52.93 simulated seconds.
+- Wrote the M3 report section and prepared the latest-main run evidence.
 
 ## Mohammad Shahvez (M4 – Control and Results)
 
