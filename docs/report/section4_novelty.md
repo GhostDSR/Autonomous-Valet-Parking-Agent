@@ -45,9 +45,9 @@ Offline scenarios (`results/agent/agent_scenarios.md`):
 
 | Scenario | What happens | Result |
 |---|---|---|
-| Normal | Picks the best slot, drives, reverses in | Parked in A2 after 61 s; closest gap 0.20 m |
-| Slot taken | Another car takes our slot 3 s into the drive | Replans to B0; parked after 63 s; closest gap 0.21 m |
-| Pedestrian | Steps onto the route 6 m ahead, leaves after 10 s | Two replans; parked in A2 after 87 s; closest gap 0.23 m |
+| Normal | Picks the best slot, drives, reverses in | Parked in A2 after 53 s; closest gap 0.20 m |
+| Slot taken | Another car takes our slot 3 s into the drive | Replans to B0; parked after 55 s; closest gap 0.21 m |
+| Pedestrian | Steps onto the route 6 m ahead, leaves after 10 s | Two replans; parked in A2 after 78 s; closest gap 0.23 m |
 
 ## 4.6 Measured parking success in every bay
 
@@ -68,4 +68,20 @@ Final success rate per row (`results/agent/agent_sweep.md`):
 
 In none of the 40 runs did the car touch anything: the closest it came was 0.07 m.
 
+The sweep was rerun after M3's parking speed and lookahead were tuned in Webots (0.35 → 0.45 m/s, 0.65 → 0.55 m; Section 4.7). The success rate and the failing bays did not change, the mean time to park fell from 77.0 s to 68.6 s (11 %), and the largest final heading error fell from 0.26° to 0.11°. Every parked car ended within 5.3 cm of the bay centre.
+
 The six bays that still fail (A8, B8, C0, C8, C9, D1) are at or next to the ends of the aisles. There, either reaching the bay needs a multi-point turn in a narrow space, or the reverse swing passes the end wall within the 0.15 m safety limit. In every case the safety layer stops the car before contact. Better path tracking through direction changes (M4) and a tighter set-up for end bays (M3) are the next steps.
+
+## 4.7 Offline results confirmed in Webots
+
+The offline runs use our own simulated lidar and a bicycle model of the car, so the same agent was also run in Webots, where M1 senses the bays from the real lidar scan and M4 drives the four wheel and two steering motors (`results/m3_webots_tuning/`, `docs/m3_webots_tuning.md`). The first Webots runs exposed one problem the offline model could not: with the lidar mounted 0.28 m above the rear axle, it saw the car's own wheels, so the map showed obstacles around the car and no route could be planned. Raising it to 0.35 m, above the tyres and below the cabin, fixed this.
+
+M3 then compared its old and tuned parking settings in Webots on three bays, starting from the lot entrance each time (time from the start of the parking manoeuvre to parked):
+
+| Bay | Parking time, old → tuned (s) | Centre error, old → tuned (cm) | Heading error, old → tuned (°) | Closest lidar gap, tuned (m) |
+|---|---|---|---|---|
+| A2 | 45.2 → 36.7 | 6.3 → 5.9 | 0.76 → 0.40 | 0.18 |
+| B0 | 46.0 → 37.2 | 6.3 → 6.0 | 0.74 → 0.36 | 0.21 |
+| A5 | 45.2 → 36.7 | 6.3 → 5.9 | 0.78 → 0.40 | 0.20 |
+
+All five validation runs with the tuned settings parked, about 19 % faster, with the heading error halved. The Webots errors are close to the offline ones (about 5 cm and well under 1°), which supports using the offline sweep for the 40-bay success rate. Webots has so far been run on three bays and without moving obstacles; the remaining bays and the pedestrian scenario are still to be repeated there.
