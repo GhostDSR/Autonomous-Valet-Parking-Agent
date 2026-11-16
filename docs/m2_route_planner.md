@@ -57,15 +57,17 @@ if reason:                                             # slot taken or route blo
 
 Webots ENU (the default since R2022a): x and y on the ground, z up. Heading is measured anticlockwise from +x, in radians. Origin is the bottom-left corner of the lot. The car's reference point is the **centre of the rear axle**.
 
-## Decisions needed from M1 (all values in the code are placeholders)
+## Agreed with M1
 
-| What | Where in code | Current placeholder |
+These values are shared by the planner and the Webots world. `tests/test_m1_world.py` checks the world file against `planner/parking_lot.py`, so they cannot drift apart.
+
+| What | Where in code | Value |
 |---|---|---|
 | Lot size, origin, entrance position | `planner/parking_lot.py` | 40 × 34 m, origin bottom-left, entrance gap in the left wall at y = 6–11 m |
-| Bay size, positions, ids, rows | `planner/parking_lot.py` | 2.5 × 5 m bays, rows A–D, 10 bays each, ids `A0`…`D9`; rows A and D start 0.5 m from the outer wall (the world file still has them against the wall) |
+| Bay size, positions, ids, rows | `planner/parking_lot.py` | 2.5 × 5 m bays, rows A–D, 10 bays each, ids `A0`…`D9`; rows A and D stand 0.5 m off the outer wall |
 | Kerb between rows B and C | `planner/parking_lot.py` | 0.2 m kerb at y = 17 m |
 | Car model dimensions | `planner/vehicle.py` `VehicleParams` | wheelbase 2.8 m, max steer 0.5 rad, 4.6 × 1.9 m, rear overhang 1.0 m |
-| Is the Webots car's origin at the rear axle? | `planner/vehicle.py` | assumed yes, to be checked |
+| Car reference point | `planner/vehicle.py` | centre of the rear axle; the Webots Robot origin and GPS are there too (`docs/m1_world_sensors.md`) |
 | Grid resolution | `build_parking_lot(resolution=...)` | 0.25 m |
 | Where the car starts | `ENTRANCE_POSE` | (2.0, 8.5, 0.0) |
 
