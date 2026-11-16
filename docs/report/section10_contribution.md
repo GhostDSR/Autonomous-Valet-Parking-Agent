@@ -20,7 +20,13 @@ Each member wrote and committed their own module from their own GitHub account, 
 
 ## Devansh Singh Rawat (M1 – World and Sensors)
 
-_To be written by Devansh._
+- **Webots world** (`worlds/parking_lot.wbt`): the 40 m × 34 m parking lot built to the same numbers as M2's map: entrance gap, 40 bays (A0–D9), the kerbed centre island and 22 parked cars. Rows A and D were moved 0.5 m off the outer wall so a lidar return from the wall cannot be mistaken for a parked car, and parked cars lie along their bays. The world declares the PROTOs it uses, so it opens on a fresh clone.
+- **Car model**: a dynamic four-wheel Ackermann vehicle with steering joints, four wheel motors and position sensors. The chassis is split so the steered front wheels can turn, and the pose reference is the centre of the rear axle, as M2, M3 and M4 expect. Added the throw-away bring-up controller `controllers/m1_actuator_check/` that checks the motor and steering signs once.
+- **Sensors and conventions** (`controllers/valet_controller/`): GPS, compass, IMU, 360° lidar, four distance sensors and steering and wheel sensors. Fixed the compass sign and the lidar scan order and removed a wrong lidar rotation, all of which are invisible at the spawn heading. Raised the lidar from 0.28 m to 0.35 m so it no longer detects the car's own wheels.
+- **Slot detection** (`m1_sensors.py`): lidar rays are intersected with every bay footprint to label each bay occupied, free or unknown, ignoring returns from beyond a bay's back line. Body clearances are measured to the vehicle footprint in four sectors and left as missing, never filled with a large value, when there is no data.
+- **Tests**: `tests/test_m1_world.py` checks the world file against `planner/parking_lot.py`; `test_m1_world_scan.py`, `test_m1_sensors.py` and `test_m1_actuator_check.py` check the scan, slot detection and actuator helpers.
+- **Fresh-clone run**: set the world's default controller to `valet_agent`, so pressing Run starts the integrated agent instead of the sensor-only controller.
+- **Documentation**: `docs/m1_world_sensors.md` and the World and Sensors report section, including what went wrong when the world was first run.
 
 ## Harshil Mittal (M3 – Parking Manoeuvres)
 
