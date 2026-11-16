@@ -26,10 +26,10 @@ A car cannot turn on the spot. With wheelbase `L` and maximum steering angle `δ
 
 Grid A* ignores the turning radius, so its paths have sharp corners that a car cannot drive. Two fixes are common:
 
-1. **Smooth the path afterwards**, for example with gradient descent that pulls each point towards its neighbours. This rounds corners off but does not guarantee the turning radius is respected [10].
-2. **Plan with the car's motion built in.** Pivtoraiko *et al.* search a *state lattice* of pre-computed drivable motions [11]. Dolgov *et al.* proposed **Hybrid A\*** for the Stanford entry in the DARPA Urban Challenge [10], [12]. It keeps a continuous `(x, y, heading)` state, expands it by driving short arcs of the car model, and stores at most one state per cell of a coarse 3D grid. It uses an obstacle-aware 2D heuristic and finishes with an analytic Reeds–Shepp step to the goal. Hybrid A* was designed for parking lots and other semi-structured spaces, which is exactly our setting.
+1. **Smooth the path afterwards.** Dolgov *et al.* refine their routes with a numerical optimisation that trades off smoothness, distance from obstacles and curvature [10]; a simpler version, which our project uses for grid A*, pulls each point towards its neighbours. Smoothing rounds corners off, but because curvature is only a penalty in the cost, it does not guarantee the turning radius is respected.
+2. **Plan with the car's motion built in.** Pivtoraiko *et al.* search a *state lattice* of pre-computed drivable motions [11]. Dolgov *et al.* proposed **Hybrid A\*** for the Stanford entry in the DARPA Urban Challenge [10], [12]. It keeps a continuous `(x, y, heading)` state, expands it by driving short arcs of the car model, and stores at most one state per cell of a coarse 3D grid. Its heuristic is the larger of two estimates: a 2D distance that goes around obstacles but ignores the turning radius, and a distance that respects the turning radius but ignores obstacles. It finishes with an analytic Reeds–Shepp step to the goal. Hybrid A* was designed for parking lots and other semi-structured spaces, which is exactly our setting.
 
-Paden *et al.* survey these planning methods, and the controllers in Section 3.4, for self-driving vehicles [13]. They note that the planner and the controller must agree on the vehicle model for a route to be drivable.
+Paden *et al.* survey these planning methods, the controllers in Section 3.4 and the vehicle models they rely on, for self-driving vehicles [13]. A lesson we draw from this, and saw in our own integration, is that the planner and the controller must use the same vehicle model for a route to be drivable.
 
 ## 3.4 Following the route
 
@@ -41,7 +41,7 @@ Local reactive methods keep the car safe between plans. The dynamic window appro
 
 ## 3.6 Simulation
 
-Webots is an open-source robot simulator with physics, sensor models (lidar, GPS, compass) and a vehicle library for Ackermann cars [18]. Testing in simulation lets us run the same scenario many times and compare methods fairly, which would be costly and unsafe with a real car.
+Webots is a robot simulator with physics, sensor models (lidar, GPS, compass) and a vehicle library for Ackermann cars [18]. Testing in simulation lets us run the same scenario many times and compare methods fairly, which would be costly and unsafe with a real car.
 
 ## 3.7 Gap addressed by this project
 
