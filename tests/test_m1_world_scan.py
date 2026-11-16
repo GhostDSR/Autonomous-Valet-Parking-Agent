@@ -2,7 +2,7 @@
 
 CI cannot run Webots, so this ray-casts a 721-sample, 360-degree lidar scan
 against the walls and parked cars read straight from the world file (the
-things the lidar plane at z = 0.58 m can hit; the 0.24 m island kerb and the
+things the lidar plane at z = 0.65 m can hit; the 0.24 m island kerb and the
 paint lines are below it) and checks what classify_slots_from_scan makes of it.
 """
 import math

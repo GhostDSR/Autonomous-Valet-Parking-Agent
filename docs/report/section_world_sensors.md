@@ -17,7 +17,7 @@ The car is a dynamic four-wheel Ackermann vehicle, 4.6 m × 1.9 m, with a 2.8 m 
 | Sensor | Use |
 |---|---|
 | GPS, compass, IMU | Rear-axle position and heading (counter-clockwise from +x) |
-| 360° planar lidar, 721 rays, 40 m | Slot occupancy and body clearances. The scan plane is 0.58 m above the floor, so it hits walls and parked cars but not the kerb or the paint lines |
+| 360° planar lidar, 721 rays, 40 m | Slot occupancy and body clearances. The scan plane is 0.65 m above the floor, so it hits walls and parked cars but not the kerb or the paint lines |
 | Four distance sensors (front, rear, left, right) | Near-field cross-check; logged raw, not yet calibrated |
 | Steering and wheel position sensors | Steering angle and wheel odometry |
 
