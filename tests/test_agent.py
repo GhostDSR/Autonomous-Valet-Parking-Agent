@@ -51,6 +51,13 @@ class TestWholeAgent(unittest.TestCase):
         self.assertLess(res["centre_error_cm"], 15)
         self.assertLess(res["heading_error_deg"], 3)
 
+        # The status text (shown in the Webots console) follows the phase.
+        status = res["status_by_phase"]
+        self.assertIn(res["slot"], status["DRIVE"])
+        for phase in ("DRIVE", "ALIGN", "PARK"):
+            self.assertNotIn("Looking for a free slot", status[phase])
+        self.assertEqual(status["DONE"], "Parking completed")
+
 
 if __name__ == "__main__":
     unittest.main()

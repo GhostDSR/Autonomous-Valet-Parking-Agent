@@ -87,6 +87,7 @@ def run(scenario="normal", occupied=DEFAULT_OCCUPIED, known_slots=None, t_max=18
     car = Bicycle(*ENTRANCE_POSE, BicycleParams(L=g.wheelbase_m, max_steer=g.max_steer_rad))
 
     trace, world_events = [], []
+    status_by_phase = {}          # first status text shown in each phase
     min_gap, t, step = math.inf, 0.0, 0
     taken = ped_placed = ped_removed = False
     while t < t_max and agent.phase not in ("DONE", "FAILED", "EMERGENCY_STOP"):
@@ -112,6 +113,7 @@ def run(scenario="normal", occupied=DEFAULT_OCCUPIED, known_slots=None, t_max=18
         act = agent.step(t, pose, car.v, world.lidar_scan(pose))
         car.step(act.steer, act.accel, act.direction, DT)
         trace.append((t, car.x, car.y, car.yaw, car.v, agent.phase))
+        status_by_phase.setdefault(agent.phase, agent.reason)
         if step % 5 == 0:
             min_gap = min(min_gap, body_gap(world, (car.x, car.y, car.yaw), g))
         t += DT
@@ -119,6 +121,7 @@ def run(scenario="normal", occupied=DEFAULT_OCCUPIED, known_slots=None, t_max=18
 
     result = {"scenario": scenario, "phase": agent.phase, "reason": agent.reason,
               "time_s": t, "trace": trace, "events": agent.events, "world_events": world_events,
+              "status_by_phase": status_by_phase,
               "plans": agent.plans, "slot": agent.choice.slot_id if agent.choice else None,
               "replans": max(0, len(agent.plans) - 1), "min_gap_m": min_gap,
               "occupied": set(world.occupied), "pedestrians": dict(world.pedestrians),
