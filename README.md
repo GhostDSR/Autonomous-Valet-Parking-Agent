@@ -104,7 +104,7 @@ Run the standalone M3 tests from the repository root:
 python -m unittest discover -s tests -p "test_parking.py" -v
 ```
 
-The 19 tests pass in GitHub Actions. They use synthetic sensor inputs and a kinematic vehicle model. Webots integration and experiments with M1 and M4 remain pending.
+GitHub Actions runs the project’s module test suites; the latest-main checks were green at the time of the Webots run. The integrated agent completed a full Webots A2 run on 16 November 2026 when the car used the valet_agent controller; parking finished at 52.93 simulated seconds. See the [M3 report](docs/report/section_m3_parking.md) and [M3 Webots tuning results](docs/m3_webots_tuning.md). For a fresh clone, valet_car in worlds/parking_lot.wbt must use the valet_agent controller.
 
 See [M3 documentation](docs/m3_parking.md) for interfaces, assumptions and configuration.
 
