@@ -233,6 +233,7 @@ class ValetAgent:
         self.fsm.select_slot(ParkingSlot(s.slot_id, s.x, s.y, s.yaw, BAY_WIDTH, BAY_DEPTH),
                              Pose(*choice.goal))
         self.phase = "DRIVE"
+        self.reason = f"Driving to slot {choice.slot_id}"
         self._log(now_s, f"route to {choice.slot_id}: {len(choice.path)} poses, "
                          f"{choice.stats['time_s']:.2f} s planning")
         return True
@@ -316,7 +317,8 @@ class ValetAgent:
                 self._log(now_s, self.reason)
                 self.next_check_s = now_s       # re-plan as soon as the car stands still
         elif cmd.state in (ParkingState.ALIGN, ParkingState.PARK):
-            self.phase = cmd.state.name
+            # M3 says what the manoeuvre is doing; show that as the status text.
+            self.phase, self.reason = cmd.state.name, cmd.reason
         elif cmd.state in (ParkingState.DONE, ParkingState.FAILED, ParkingState.EMERGENCY_STOP):
             if self.phase != cmd.state.name:
                 self._log(now_s, f"{cmd.state.name}: {self.fsm.reason}")
